@@ -1,30 +1,142 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cardápio Digital</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="style.css">
+  <!-- IMPORTANTE: paths RELATIVOS -->
+  <link rel="stylesheet" href="./style.css" />
 
-  <!-- Supabase -->
+  <!-- Supabase JS v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
+  <header>
+    <h1 id="nomeLoja">Carregando cardápio...</h1>
+  </header>
 
-<header>
-  <h1 id="nome-loja">Carregando...</h1>
-</header>
+  <main id="categorias"></main>
 
-<main id="conteudo">
-  <p style="text-align:center">Carregando cardápio...</p>
-</main>
+  <div id="carrinho">
+    <span id="total">Total: R$ 0,00</span>
+    <button id="finalizar">Finalizar pedido</button>
+  </div>
 
-<div id="carrinho">
-  <button onclick="finalizarPedido()">🛒 Finalizar Pedido</button>
-  <span id="total">R$ 0,00</span>
-</div>
+  <script>
+    /* ================================
+       CONFIG SUPABASE
+    ================================= */
+    const SUPABASE_URL = "https://rgsnmxspyyywouhcdwkj.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
 
-<script src="script.js"></script>
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    /* ================================
+       UTIL
+    ================================= */
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("u") || "cafeteria";
+
+    const categoriasEl = document.getElementById("categorias");
+    const nomeLojaEl = document.getElementById("nomeLoja");
+
+    let carrinho = [];
+
+    function formatarPreco(v) {
+      return v.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+
+    /* ================================
+       CARREGAR DADOS
+    ================================= */
+    async function carregarCardapio() {
+      // Cliente
+      const { data: cliente, error: erroCliente } = await supabaseClient
+        .from("clientes")
+        .select("*")
+        .eq("slug", slug)
+        .single();
+
+      if (erroCliente || !cliente) {
+        nomeLojaEl.textContent = "Loja não encontrada";
+        return;
+      }
+
+      nomeLojaEl.textContent = cliente.nome;
+
+      // Categorias
+      const { data: categorias } = await supabaseClient
+        .from("categorias")
+        .select("*")
+        .eq("cliente_slug", slug)
+        .eq("ativo", true)
+        .order("ordem");
+
+      // Produtos
+      const { data: produtos } = await supabaseClient
+        .from("produtos")
+        .select("*")
+        .eq("cliente_slug", slug)
+        .eq("ativo", true);
+
+      categoriasEl.innerHTML = "";
+
+      categorias.forEach(cat => {
+        const bloco = document.createElement("section");
+        bloco.innerHTML = `<h2>${cat.nome}</h2>`;
+
+        produtos
+          .filter(p => p.categoria_id === cat.id)
+          .forEach(p => {
+            const item = document.createElement("div");
+            item.className = "produto";
+            item.innerHTML = `
+              <strong>${p.nome}</strong>
+              <p>${p.descricao || ""}</p>
+              <span>${formatarPreco(p.preco)}</span>
+              <button>Adicionar</button>
+            `;
+
+            item.querySelector("button").onclick = () => {
+              carrinho.push(p);
+              atualizarTotal();
+            };
+
+            bloco.appendChild(item);
+          });
+
+        categoriasEl.appendChild(bloco);
+      });
+    }
+
+    function atualizarTotal() {
+      const total = carrinho.reduce((s, p) => s + p.preco, 0);
+      document.getElementById("total").textContent =
+        "Total: " + formatarPreco(total);
+    }
+
+    document.getElementById("finalizar").onclick = () => {
+      if (carrinho.length === 0) return;
+
+      const msg = carrinho
+        .map(p => `• ${p.nome} - ${formatarPreco(p.preco)}`)
+        .join("%0A");
+
+      const total = carrinho.reduce((s, p) => s + p.preco, 0);
+
+      const texto = `Pedido:%0A${msg}%0A%0ATotal: ${formatarPreco(total)}`;
+      window.open(`https://wa.me/55${cliente.whatsapp}?text=${texto}`);
+    };
+
+    carregarCardapio();
+  </script>
 </body>
 </html>
