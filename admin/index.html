@@ -5,7 +5,7 @@
   <title>Painel Alfa – Cardápio Digital</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Supabase JS v2 -->
+  <!-- Supabase JS v2 (só para AUTH no front) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -34,11 +34,7 @@
       color: var(--text);
     }
 
-    .container{
-      max-width: 1180px;
-      margin: 18px auto;
-      padding: 0 14px 34px;
-    }
+    .container{ max-width: 1180px; margin: 18px auto; padding: 0 14px 34px; }
 
     header{
       margin: 14px 0 18px;
@@ -50,61 +46,28 @@
     }
 
     .header-top{
-      display:flex;
-      gap:14px;
-      justify-content: space-between;
-      align-items:center;
+      display:flex; gap:14px; justify-content: space-between; align-items:center;
       flex-wrap:wrap;
     }
 
-    .brandbox{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      min-width: 240px;
-    }
-
+    .brandbox{ display:flex; gap:12px; align-items:center; min-width: 240px; }
     .logo-slot{
-      width:46px; height:46px;
-      border-radius: 14px;
+      width:46px; height:46px; border-radius: 14px;
       border: 1px dashed rgba(255,255,255,.28);
       background: rgba(255,255,255,.06);
       display:flex; align-items:center; justify-content:center;
-      color: var(--muted);
-      font-weight: 900;
-      user-select:none;
+      color: var(--muted); font-weight: 900; user-select:none;
     }
 
-    .brandtext h1{
-      margin:0;
-      font-size: 18px;
-      letter-spacing: .2px;
-    }
-    .brandtext .sub{
-      margin-top: 2px;
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .brandtext h1{ margin:0; font-size: 18px; letter-spacing: .2px; }
+    .brandtext .sub{ margin-top: 2px; font-size: 12px; color: var(--muted); }
 
-    .hdr-actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
+    .hdr-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
     .pill{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding:8px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      font-size: 12px;
-      white-space: nowrap;
+      display:inline-flex; gap:8px; align-items:center;
+      padding:8px 10px; border-radius: 999px;
+      border: 1px solid var(--border); background: rgba(255,255,255,.06);
+      color: var(--text); font-size: 12px; white-space: nowrap;
     }
     .pill code{
       color: rgba(255,255,255,.85);
@@ -129,21 +92,17 @@
       border-color: rgba(255,255,255,.15);
       color: #06101f;
     }
-    .btn.primary:hover{ filter: brightness(1.02); }
     .btn.danger{
       background: rgba(255,90,122,.14);
       border-color: rgba(255,90,122,.35);
       color: rgba(255,255,255,.92);
     }
     .btn.small{ padding: 8px 10px; border-radius: 14px; font-size: 12px; }
-
     .btn[disabled]{ opacity:.6; cursor:not-allowed; }
 
     .summary{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 14px;
+      display:grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px; margin-top: 14px;
     }
     @media (max-width: 860px){ .summary{ grid-template-columns: 1fr; } }
 
@@ -152,10 +111,7 @@
       background: rgba(255,255,255,.06);
       border-radius: var(--radius);
       padding: 12px 14px;
-      display:flex;
-      justify-content: space-between;
-      align-items:center;
-      gap:10px;
+      display:flex; justify-content: space-between; align-items:center; gap:10px;
       min-height: 64px;
     }
     .sumcard .label{ color: var(--muted); font-size: 12px; }
@@ -172,14 +128,9 @@
     .hidden{ display:none; }
     .muted{ color: var(--muted); font-size: 13px; }
 
-    .tabs{
-      margin-top: 16px;
-      display:flex;
-      justify-content: center;
-    }
+    .tabs{ margin-top: 16px; display:flex; justify-content: center; }
     .seg{
-      display:flex;
-      gap:0;
+      display:flex; gap:0;
       border:1px solid var(--border);
       background: rgba(255,255,255,.05);
       border-radius: 999px;
@@ -187,8 +138,7 @@
       width: fit-content;
     }
     .seg button{
-      border:0;
-      background: transparent;
+      border:0; background: transparent;
       color: var(--muted);
       padding: 10px 18px;
       cursor:pointer;
@@ -196,10 +146,7 @@
       transition: background .15s ease, color .15s ease;
       letter-spacing: .2px;
     }
-    .seg button.active{
-      background: rgba(255,255,255,.12);
-      color: var(--text);
-    }
+    .seg button.active{ background: rgba(255,255,255,.12); color: var(--text); }
     .seg button:hover{ background: rgba(255,255,255,.09); color: var(--text); }
 
     .card{
@@ -224,7 +171,7 @@
       background: rgba(0,0,0,.22);
       color: var(--text);
       outline: none;
-      transition: border .15s ease, transform .08s ease, background .15s ease;
+      transition: border .15s ease, background .15s ease;
     }
     input::placeholder, textarea::placeholder{ color: rgba(255,255,255,.45); }
     input:focus, select:focus, textarea:focus{
@@ -242,11 +189,7 @@
       border-radius: var(--radius);
       background: rgba(255,255,255,.04);
     }
-    table{
-      width:100%;
-      border-collapse: collapse;
-      min-width: 980px;
-    }
+    table{ width:100%; border-collapse: collapse; min-width: 980px; }
     th, td{
       padding: 12px;
       border-bottom: 1px solid rgba(255,255,255,.08);
@@ -254,8 +197,7 @@
       font-size: 14px;
     }
     th{
-      position: sticky;
-      top: 0;
+      position: sticky; top: 0;
       background: rgba(0,0,0,.35);
       color: rgba(255,255,255,.88);
       font-size: 12px;
@@ -269,17 +211,10 @@
       color: rgba(255,255,255,.86);
     }
 
-    .actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+    .actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 
     .tag{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
+      display:inline-flex; align-items:center; gap:6px;
       padding: 6px 10px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.14);
@@ -330,14 +265,11 @@
     .msg.err{ border-color: rgba(255,90,122,.35); background: rgba(255,90,122,.10); }
 
     .modal-backdrop{
-      position: fixed;
-      inset:0;
+      position: fixed; inset:0;
       background: rgba(0,0,0,.55);
       display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 16px;
-      z-index: 9999;
+      align-items:center; justify-content:center;
+      padding: 16px; z-index: 9999;
     }
     .modal{
       width: min(860px, 100%);
@@ -349,9 +281,7 @@
       padding: 14px;
     }
     .modal-header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      display:flex; align-items:center; justify-content:space-between;
       gap:10px;
       padding-bottom: 10px;
       border-bottom: 1px solid rgba(255,255,255,.10);
@@ -370,37 +300,28 @@
           <div class="logo-slot" title="Espaço para logo">LOGO</div>
           <div class="brandtext">
             <h1>Painel Alfa – Cardápio Digital</h1>
-            <div class="sub">Super Admin • Gerencie clientes, categorias e produtos</div>
+            <div class="sub">Super Admin • CRUD seguro via Vercel (Service Role)</div>
           </div>
         </div>
 
         <div class="hdr-actions">
           <span class="pill"><b>Status:</b> <span id="statusUser">-</span></span>
-          <span class="pill"><b>Supabase:</b> <code id="sbHost">-</code></span>
+          <span class="pill"><b>API:</b> <code id="apiHost">-</code></span>
           <button class="btn danger" id="btnLogout" type="button">Sair</button>
         </div>
       </div>
 
       <div class="summary">
         <div class="sumcard">
-          <div>
-            <div class="label">Clientes</div>
-            <div class="value" id="countClientes">-</div>
-          </div>
+          <div><div class="label">Clientes</div><div class="value" id="countClientes">-</div></div>
           <span class="tag">Total</span>
         </div>
         <div class="sumcard">
-          <div>
-            <div class="label">Categorias</div>
-            <div class="value" id="countCategorias">-</div>
-          </div>
+          <div><div class="label">Categorias</div><div class="value" id="countCategorias">-</div></div>
           <span class="tag">Total</span>
         </div>
         <div class="sumcard">
-          <div>
-            <div class="label">Produtos</div>
-            <div class="value" id="countProdutos">-</div>
-          </div>
+          <div><div class="label">Produtos</div><div class="value" id="countProdutos">-</div></div>
           <span class="tag">Total</span>
         </div>
       </div>
@@ -416,7 +337,7 @@
 
     <!-- LOGIN -->
     <section id="secLogin" class="panel">
-      <h2 style="margin:0 0 10px;">Login</h2>
+      <h2 style="margin:0 0 10px;">Login (Supabase Auth)</h2>
       <div class="row">
         <div>
           <label>Email</label>
@@ -433,7 +354,7 @@
       </div>
 
       <div id="loginMsg"></div>
-      <p class="muted">Use um usuário do Supabase Auth (email/senha).</p>
+      <p class="muted">Depois de logar, o CRUD roda via Vercel com token (Bearer).</p>
     </section>
 
     <!-- ADMIN -->
@@ -480,7 +401,7 @@
             <button class="btn primary" id="btnSalvarCliente" type="button">Salvar Cliente</button>
           </div>
           <div id="msgCliente"></div>
-          <div class="muted" style="margin-top:8px;">Dica: link público usa <code>?u=slug</code> (ex: <code>?u=cafeteria-do-joao</code>).</div>
+          <div class="muted" style="margin-top:8px;">Link público: <code>?u=slug</code> (ex: <code>?u=cafeteria-do-joao</code>).</div>
         </div>
 
         <div class="card">
@@ -698,20 +619,26 @@
   </div>
 
 <script>
-  console.log("ADMIN JS CARREGOU ✅");
+  console.log("ADMIN (VERCEL) JS CARREGOU ✅");
 
-  // ===============================
-  // SUPABASE CONFIG
-  // ===============================
+  // ======================================
+  // CONFIG (AUTH no Supabase + CRUD na Vercel)
+  // ======================================
   const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  const SUPABASE_ANON_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
+
+  // Base da API (Vercel)
+  // - Se você abrir este admin no domínio da Vercel, ele usa location.origin
+  // - Se abrir no GitHub Pages, ele usa seu domínio fixo da Vercel
+  const VERCEL_BASE = "https://cafeteria-gamma-orpin.vercel.app";
+  const API_BASE = (location.hostname.endsWith("vercel.app")) ? location.origin : VERCEL_BASE;
+
+  document.getElementById("apiHost").textContent = new URL(API_BASE).host;
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
   });
 
-  // ===============================
-  // HELPERS
-  // ===============================
   const $ = (id) => document.getElementById(id);
 
   function showMsg(el, type, text){
@@ -726,7 +653,7 @@
       btn.disabled = true;
       btn.dataset._old = btn.textContent;
       btn.textContent = text || "Salvando...";
-    }else{
+    } else {
       btn.disabled = false;
       btn.textContent = btn.dataset._old || btn.textContent;
       delete btn.dataset._old;
@@ -740,15 +667,12 @@
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
   }
-
   function brl(v){
     return Number(v || 0).toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
   }
-
   function tagAtivo(v){
     return v ? `<span class="tag ok">Ativo</span>` : `<span class="tag off">Inativo</span>`;
   }
-
   function escapeHtml(s){
     return String(s ?? "")
       .replaceAll("&","&amp;")
@@ -757,18 +681,7 @@
       .replaceAll('"',"&quot;")
       .replaceAll("'","&#039;");
   }
-  function escapeAttr(s){
-    return escapeHtml(s).replaceAll("\n"," ");
-  }
-
-  function bindSafe(id, event, fn){
-    const el = $(id);
-    if(!el){
-      console.warn(`Elemento #${id} não encontrado`);
-      return;
-    }
-    el.addEventListener(event, fn);
-  }
+  function escapeAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
 
   function publicBaseUrl(){
     const url = new URL(location.href);
@@ -781,19 +694,49 @@
     const base = publicBaseUrl();
     window.open(`${base}?u=${encodeURIComponent(slug)}`, "_blank");
   }
+  window.openPublished = openPublished;
 
-  // ===============================
+  // ======================================
+  // API helper (com Bearer token)
+  // ======================================
+  async function getToken(){
+    const { data } = await supabaseClient.auth.getSession();
+    const token = data?.session?.access_token;
+    if(!token) throw new Error("Sem sessão. Faça login novamente.");
+    return token;
+  }
+
+  async function apiFetch(path, { method="GET", body } = {}){
+    const token = await getToken();
+
+    const res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+
+    const json = await res.json().catch(() => ({}));
+
+    if(!res.ok){
+      const msg = json?.error || `Erro HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+    return json;
+  }
+
+  // ======================================
   // STATE
-  // ===============================
+  // ======================================
   let CLIENTES = [];
   let CATEGORIAS = [];
   let PRODUTOS = [];
 
-  // ===============================
-  // AUTH + INIT
-  // ===============================
-  if($("sbHost")) $("sbHost").textContent = new URL(SUPABASE_URL).host;
-
+  // ======================================
+  // AUTH
+  // ======================================
   async function login(){
     clearMsg($("loginMsg"));
     const email = $("loginEmail").value.trim();
@@ -814,8 +757,8 @@
     location.reload();
   }
 
-  bindSafe("btnLogin", "click", login);
-  bindSafe("btnLogout", "click", logout);
+  $("btnLogin").addEventListener("click", login);
+  $("btnLogout").addEventListener("click", logout);
 
   supabaseClient.auth.onAuthStateChange(async (_, session) => {
     if(session){
@@ -842,24 +785,61 @@
 
   async function refreshAll(){
     clearMsg($("globalMsg"));
-    await loadClientes(true);
-    await loadCategorias(true);
-    await loadProdutos(true);
+    try{
+      await Promise.all([loadClientes(true), loadCategorias(true), loadProdutos(true)]);
+      await loadCategoriasSelectProduto();
+    }catch(err){
+      console.error(err);
+      showMsg($("globalMsg"), "err", err.message || String(err));
+    }
   }
 
-  // ===============================
+  // ======================================
+  // LOAD (via Vercel)
+  // ======================================
+  async function loadClientes(){
+    const { data } = await apiFetch("/api/admin/clientes", { method:"GET" });
+    CLIENTES = data || [];
+    $("countClientes").textContent = CLIENTES.length;
+
+    // popular selects
+    const optBase = `<option value="">Selecione o cliente</option>`;
+    const opts = CLIENTES.map(c => `<option value="${escapeAttr(c.slug)}">${escapeHtml(c.nome)} (${escapeHtml(c.slug)})</option>`).join("");
+
+    $("catCliente").innerHTML = optBase + opts;
+    $("prodCliente").innerHTML = optBase + opts;
+    $("filtroCatCliente").innerHTML = `<option value="">Todos os clientes</option>` + opts;
+    $("filtroProdCliente").innerHTML = `<option value="">Todos os clientes</option>` + opts;
+
+    renderClientes();
+  }
+
+  async function loadCategorias(){
+    const { data } = await apiFetch("/api/admin/categorias", { method:"GET" });
+    CATEGORIAS = data || [];
+    $("countCategorias").textContent = CATEGORIAS.length;
+    renderCategorias();
+  }
+
+  async function loadProdutos(){
+    const { data } = await apiFetch("/api/admin/produtos", { method:"GET" });
+    PRODUTOS = data || [];
+    $("countProdutos").textContent = PRODUTOS.length;
+    renderProdutos();
+  }
+
+  // ======================================
   // CLIENTES
-  // ===============================
-  bindSafe("cliNome", "input", () => {
+  // ======================================
+  $("cliNome").addEventListener("input", () => {
     if(!$("cliSlug").value.trim()) $("cliSlug").value = slugify($("cliNome").value);
   });
 
-  bindSafe("btnSalvarCliente", "click", salvarCliente);
-  bindSafe("filtroCliente", "input", () => renderClientes());
+  $("filtroCliente").addEventListener("input", renderClientes);
+  $("btnSalvarCliente").addEventListener("click", salvarCliente);
 
   async function salvarCliente(){
     clearMsg($("msgCliente"));
-
     const nome = $("cliNome").value.trim();
     const slug = slugify($("cliSlug").value.trim());
     const whatsapp = $("cliWhats").value.trim();
@@ -874,8 +854,10 @@
     setBtnLoading(btn, true);
 
     try{
-      const { error } = await supabaseClient.from("clientes").insert({ nome, slug, whatsapp, ativo });
-      if(error) throw error;
+      await apiFetch("/api/admin/clientes", {
+        method: "POST",
+        body: { nome, slug, whatsapp, ativo }
+      });
 
       showMsg($("msgCliente"), "ok", "Cliente criado!");
       $("cliNome").value=""; $("cliSlug").value=""; $("cliWhats").value="";
@@ -889,37 +871,12 @@
     }
   }
 
-  async function loadClientes(silent=false){
-    const { data, error } = await supabaseClient.from("clientes").select("*").order("nome");
-    if(error){
-      console.error(error);
-      if(!silent) showMsg($("globalMsg"), "err", "Erro ao carregar clientes: " + error.message);
-      return;
-    }
-    CLIENTES = data || [];
-    $("countClientes").textContent = CLIENTES.length;
-
-    // popular selects
-    const optBase = `<option value="">Selecione o cliente</option>`;
-    const opts = CLIENTES.map(c => `<option value="${c.slug}">${escapeHtml(c.nome)} (${escapeHtml(c.slug)})</option>`).join("");
-
-    $("catCliente").innerHTML = optBase + opts;
-    $("prodCliente").innerHTML = optBase + opts;
-    $("filtroCatCliente").innerHTML = `<option value="">Todos os clientes</option>` + opts;
-    $("filtroProdCliente").innerHTML = `<option value="">Todos os clientes</option>` + opts;
-
-    renderClientes();
-  }
-
   function renderClientes(){
     const q = ($("filtroCliente").value || "").trim().toLowerCase();
-
     const rows = CLIENTES
       .filter(c => !q || (c.nome||"").toLowerCase().includes(q) || (c.slug||"").toLowerCase().includes(q))
       .map(c => {
         const isAtivo = (c.ativo === undefined) ? true : !!c.ativo;
-        const switchDisabled = (c.ativo === undefined);
-
         return `
           <tr>
             <td><b>${escapeHtml(c.nome)}</b></td>
@@ -927,8 +884,8 @@
             <td>${escapeHtml(c.whatsapp||"")}</td>
             <td>${tagAtivo(isAtivo)}</td>
             <td>
-              <label class="switch" title="${switchDisabled ? "Crie a coluna clientes.ativo (boolean)" : "Ativar/Desativar"}">
-                <input type="checkbox" ${isAtivo ? "checked":""} ${switchDisabled ? "disabled":""}
+              <label class="switch" title="Ativar/Desativar">
+                <input type="checkbox" ${isAtivo ? "checked":""}
                   onchange="toggleClienteAtivo('${escapeAttr(c.slug)}', this.checked)">
                 <span class="slider"></span>
               </label>
@@ -948,25 +905,47 @@
     $("tbClientes").innerHTML = rows || `<tr><td colspan="6" class="muted">Nenhum cliente.</td></tr>`;
   }
 
-  window.openPublished = openPublished;
-
   window.toggleClienteAtivo = async (slug, ativo) => {
     try{
-      const { error } = await supabaseClient.from("clientes").update({ ativo }).eq("slug", slug);
-      if(error) throw error;
+      await apiFetch("/api/admin/clientes", { method:"PATCH", body: { slug, ativo } });
       CLIENTES = CLIENTES.map(c => c.slug === slug ? ({...c, ativo}) : c);
       renderClientes();
     }catch(err){
       console.error(err);
-      showMsg($("globalMsg"), "err", "Falha ao atualizar status do cliente: " + (err.message || String(err)));
-      await loadClientes(true);
+      showMsg($("globalMsg"), "err", "Falha ao atualizar status: " + (err.message || String(err)));
+      await loadClientes();
     }
   };
+
+  // ======================================
+  // MODAL infra
+  // ======================================
+  let MODAL_CTX = null;
+
+  $("modalClose").addEventListener("click", closeModal);
+  $("modalCancel").addEventListener("click", closeModal);
+  $("modalBackdrop").addEventListener("click", (e) => { if(e.target.id==="modalBackdrop") closeModal(); });
+
+  function openModal(title, bodyHtml, onSave){
+    MODAL_CTX = { onSave };
+    $("modalTitle").textContent = title;
+    $("modalBody").innerHTML = bodyHtml;
+    $("modalMsg").innerHTML = "";
+    $("modalBackdrop").style.display = "flex";
+    $("modalSave").onclick = async () => {
+      $("modalMsg").innerHTML = "";
+      try{ await MODAL_CTX.onSave(); }
+      catch(err){ showMsg($("modalMsg"), "err", err.message || String(err)); }
+    };
+  }
+  function closeModal(){
+    $("modalBackdrop").style.display = "none";
+    MODAL_CTX = null;
+  }
 
   window.openEditCliente = (slug) => {
     const c = CLIENTES.find(x => x.slug === slug);
     if(!c) return;
-
     const ativoAtual = (c.ativo === undefined) ? true : !!c.ativo;
 
     openModal(
@@ -978,16 +957,11 @@
             <input id="m_cliNome" value="${escapeAttr(c.nome)}" />
           </div>
           <div>
-            <label>Slug</label>
-            <input id="m_cliSlug" value="${escapeAttr(c.slug)}" />
-            <div class="muted" style="margin-top:6px;">Se mudar slug, vamos atualizar categorias/produtos desse cliente.</div>
-          </div>
-        </div>
-        <div class="row" style="margin-top:8px;">
-          <div>
             <label>WhatsApp</label>
             <input id="m_cliWhats" value="${escapeAttr(c.whatsapp || "")}" />
           </div>
+        </div>
+        <div class="row" style="margin-top:8px;">
           <div>
             <label>Status</label>
             <select id="m_cliAtivo">
@@ -995,28 +969,18 @@
               <option value="false" ${!ativoAtual ? "selected":""}>Inativo</option>
             </select>
           </div>
+          <div class="muted" style="display:flex; align-items:end;">
+            Obs: o slug não é editado aqui (evita quebrar links). Se quiser, eu habilito depois com migração.
+          </div>
         </div>
       `,
       async () => {
         const nome = $("m_cliNome").value.trim();
-        const novoSlug = slugify($("m_cliSlug").value.trim());
         const whatsapp = $("m_cliWhats").value.trim();
         const ativo = $("m_cliAtivo").value === "true";
+        if(!nome || !whatsapp) throw new Error("Preencha nome e WhatsApp.");
 
-        if(!nome || !novoSlug || !whatsapp) throw new Error("Preencha nome, slug e WhatsApp.");
-
-        const { error } = await supabaseClient.from("clientes")
-          .update({ nome, slug: novoSlug, whatsapp, ativo })
-          .eq("slug", slug);
-        if(error) throw error;
-
-        if(novoSlug !== slug){
-          const e1 = await supabaseClient.from("categorias").update({ cliente_slug: novoSlug }).eq("cliente_slug", slug);
-          if(e1.error) throw e1.error;
-          const e2 = await supabaseClient.from("produtos").update({ cliente_slug: novoSlug }).eq("cliente_slug", slug);
-          if(e2.error) throw e2.error;
-        }
-
+        await apiFetch("/api/admin/clientes", { method:"PATCH", body: { slug, nome, whatsapp, ativo } });
         showMsg($("modalMsg"), "ok", "Cliente atualizado!");
         await refreshAll();
       }
@@ -1034,40 +998,37 @@
 
     if(!confirm(`Duplicar cliente "${c.nome}" para slug "${trySlug}"?`)) return;
 
-    const ativo = (c.ativo === undefined) ? true : !!c.ativo;
-
-    const { error } = await supabaseClient.from("clientes").insert({
-      nome: c.nome + " (cópia)",
-      slug: trySlug,
-      whatsapp: c.whatsapp,
-      ativo
-    });
-    if(error) return alert("Erro: " + error.message);
-
-    await refreshAll();
+    try{
+      await apiFetch("/api/admin/clientes", {
+        method:"POST",
+        body: { nome: c.nome + " (cópia)", slug: trySlug, whatsapp: c.whatsapp, ativo: !!c.ativo }
+      });
+      await refreshAll();
+    }catch(err){
+      alert(err.message || String(err));
+    }
   };
 
   window.deleteCliente = async (slug) => {
     const c = CLIENTES.find(x => x.slug === slug);
     if(!c) return;
 
-    if(!confirm(`Excluir cliente "${c.nome}"?\n\nIsso tentará apagar também categorias e produtos desse cliente.`)) return;
+    if(!confirm(`Excluir cliente "${c.nome}"?\n\nIsso vai apagar categorias e produtos ligados a ele.`)) return;
 
-    await supabaseClient.from("produtos").delete().eq("cliente_slug", slug);
-    await supabaseClient.from("categorias").delete().eq("cliente_slug", slug);
-
-    const { error } = await supabaseClient.from("clientes").delete().eq("slug", slug);
-    if(error) return alert("Erro: " + error.message);
-
-    await refreshAll();
+    try{
+      await apiFetch("/api/admin/clientes", { method:"DELETE", body:{ slug } });
+      await refreshAll();
+    }catch(err){
+      alert(err.message || String(err));
+    }
   };
 
-  // ===============================
+  // ======================================
   // CATEGORIAS
-  // ===============================
-  bindSafe("btnSalvarCategoria","click", salvarCategoria);
-  bindSafe("filtroCatCliente","change", () => renderCategorias());
-  bindSafe("filtroCategoria","input", () => renderCategorias());
+  // ======================================
+  $("btnSalvarCategoria").addEventListener("click", salvarCategoria);
+  $("filtroCatCliente").addEventListener("change", renderCategorias);
+  $("filtroCategoria").addEventListener("input", renderCategorias);
 
   async function salvarCategoria(){
     clearMsg($("msgCategoria"));
@@ -1085,8 +1046,7 @@
     setBtnLoading(btn, true);
 
     try{
-      const { error } = await supabaseClient.from("categorias").insert({ cliente_slug, nome, ordem, ativo });
-      if(error) throw error;
+      await apiFetch("/api/admin/categorias", { method:"POST", body:{ cliente_slug, nome, ordem, ativo } });
       showMsg($("msgCategoria"), "ok", "Categoria criada!");
       $("catNome").value=""; $("catOrdem").value=""; $("catAtivo").value="true";
       await refreshAll();
@@ -1096,19 +1056,6 @@
     }finally{
       setBtnLoading(btn, false);
     }
-  }
-
-  async function loadCategorias(silent=false){
-    const { data, error } = await supabaseClient.from("categorias").select("*").order("ordem");
-    if(error){
-      console.error(error);
-      if(!silent) showMsg($("globalMsg"), "err", "Erro ao carregar categorias: " + error.message);
-      return;
-    }
-    CATEGORIAS = data || [];
-    $("countCategorias").textContent = CATEGORIAS.length;
-    await loadCategoriasSelectProduto();
-    renderCategorias();
   }
 
   function renderCategorias(){
@@ -1137,141 +1084,6 @@
     $("tbCategorias").innerHTML = rows || `<tr><td colspan="5" class="muted">Nenhuma categoria.</td></tr>`;
   }
 
-  // ===============================
-  // PRODUTOS
-  // ===============================
-  bindSafe("prodCliente","change", loadCategoriasSelectProduto);
-  bindSafe("btnSalvarProduto","click", salvarProduto);
-  bindSafe("filtroProdCliente","change", () => renderProdutos());
-  bindSafe("filtroProduto","input", () => renderProdutos());
-
-  async function loadCategoriasSelectProduto(){
-    const slug = $("prodCliente").value;
-    $("prodCategoria").innerHTML = `<option value="">Selecione a categoria</option>`;
-    if(!slug) return;
-
-    const cats = CATEGORIAS.filter(c => c.cliente_slug === slug).sort((a,b)=>(a.ordem||0)-(b.ordem||0));
-    const opts = cats.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
-    $("prodCategoria").innerHTML = `<option value="">Selecione a categoria</option>` + opts;
-  }
-
-  async function salvarProduto(){
-    clearMsg($("msgProduto"));
-
-    const cliente_slug = $("prodCliente").value;
-    const categoria_id = $("prodCategoria").value;
-    const nome = $("prodNome").value.trim();
-    const preco = Number($("prodPreco").value || 0);
-    const imagem = $("prodImg").value.trim() || null;
-    const ativo = $("prodAtivo").value === "true";
-    const descricao = $("prodDesc").value.trim();
-
-    if(!cliente_slug || !categoria_id || !nome || !preco){
-      showMsg($("msgProduto"), "err", "Preencha cliente, categoria, nome e preço.");
-      return;
-    }
-
-    const btn = $("btnSalvarProduto");
-    setBtnLoading(btn, true);
-
-    try{
-      const { error } = await supabaseClient.from("produtos").insert({
-        cliente_slug,
-        categoria_id: Number(categoria_id),
-        nome,
-        descricao,
-        preco,
-        imagem,
-        ativo
-      });
-      if(error) throw error;
-
-      showMsg($("msgProduto"), "ok", "Produto criado!");
-      $("prodNome").value=""; $("prodPreco").value=""; $("prodImg").value=""; $("prodAtivo").value="true"; $("prodDesc").value="";
-      await refreshAll();
-    }catch(err){
-      console.error(err);
-      showMsg($("msgProduto"), "err", err.message || String(err));
-    }finally{
-      setBtnLoading(btn, false);
-    }
-  }
-
-  async function loadProdutos(silent=false){
-    const { data, error } = await supabaseClient.from("produtos").select("*").order("nome");
-    if(error){
-      console.error(error);
-      if(!silent) showMsg($("globalMsg"), "err", "Erro ao carregar produtos: " + error.message);
-      return;
-    }
-    PRODUTOS = data || [];
-    $("countProdutos").textContent = PRODUTOS.length;
-    renderProdutos();
-  }
-
-  function nomeCategoriaById(id){
-    const c = CATEGORIAS.find(x => String(x.id) === String(id));
-    return c ? c.nome : "-";
-  }
-
-  function renderProdutos(){
-    const cliente = $("filtroProdCliente").value;
-    const q = ($("filtroProduto").value || "").trim().toLowerCase();
-
-    const rows = PRODUTOS
-      .filter(p => (!cliente || p.cliente_slug === cliente))
-      .filter(p => (!q || (p.nome||"").toLowerCase().includes(q)))
-      .map(p => `
-        <tr>
-          <td>${escapeHtml(p.cliente_slug)}</td>
-          <td>${escapeHtml(nomeCategoriaById(p.categoria_id))} <span class="muted">(#${p.categoria_id})</span></td>
-          <td>
-            <b>${escapeHtml(p.nome)}</b>
-            <div class="muted">${escapeHtml((p.descricao||"").slice(0,80))}${(p.descricao||"").length>80?"…":""}</div>
-          </td>
-          <td>${brl(p.preco)}</td>
-          <td>${tagAtivo(!!p.ativo)}</td>
-          <td>
-            <div class="actions">
-              <button class="btn primary small" type="button" onclick="openEditProduto(${p.id})">Editar</button>
-              <button class="btn small" type="button" onclick="duplicateProduto(${p.id})">Duplicar</button>
-              <button class="btn danger small" type="button" onclick="deleteProduto(${p.id})">Excluir</button>
-            </div>
-          </td>
-        </tr>
-      `).join("");
-
-    $("tbProdutos").innerHTML = rows || `<tr><td colspan="6" class="muted">Nenhum produto.</td></tr>`;
-  }
-
-  // ===============================
-  // MODAL infra
-  // ===============================
-  let MODAL_CTX = null;
-  bindSafe("modalClose","click", closeModal);
-  bindSafe("modalCancel","click", closeModal);
-  $("modalBackdrop").addEventListener("click", (e) => { if(e.target.id==="modalBackdrop") closeModal(); });
-
-  function openModal(title, bodyHtml, onSave){
-    MODAL_CTX = { onSave };
-    $("modalTitle").textContent = title;
-    $("modalBody").innerHTML = bodyHtml;
-    $("modalMsg").innerHTML = "";
-    $("modalBackdrop").style.display = "flex";
-    $("modalSave").onclick = async () => {
-      $("modalMsg").innerHTML = "";
-      try{ await MODAL_CTX.onSave(); }
-      catch(err){ showMsg($("modalMsg"), "err", err.message || String(err)); }
-    };
-  }
-  function closeModal(){
-    $("modalBackdrop").style.display = "none";
-    MODAL_CTX = null;
-  }
-
-  // ===============================
-  // EDIT/DUP/DEL (Categorias e Produtos)
-  // ===============================
   window.openEditCategoria = (id) => {
     const c = CATEGORIAS.find(x => Number(x.id) === Number(id));
     if(!c) return;
@@ -1308,14 +1120,9 @@
         const nome = $("m_catNome").value.trim();
         const ordem = Number($("m_catOrdem").value||0);
         const ativo = $("m_catAtivo").value === "true";
-
         if(!cliente_slug || !nome) throw new Error("Preencha cliente e nome.");
 
-        const { error } = await supabaseClient.from("categorias")
-          .update({ cliente_slug, nome, ordem, ativo })
-          .eq("id", c.id);
-        if(error) throw error;
-
+        await apiFetch("/api/admin/categorias", { method:"PATCH", body:{ id: c.id, cliente_slug, nome, ordem, ativo } });
         showMsg($("modalMsg"), "ok", "Categoria atualizada!");
         await refreshAll();
       }
@@ -1325,33 +1132,125 @@
   window.duplicateCategoria = async (id) => {
     const c = CATEGORIAS.find(x => Number(x.id) === Number(id));
     if(!c) return;
-
     if(!confirm(`Duplicar categoria "${c.nome}"?`)) return;
 
-    const { error } = await supabaseClient.from("categorias").insert({
-      cliente_slug: c.cliente_slug,
-      nome: c.nome + " (cópia)",
-      ordem: Number(c.ordem||0) + 1,
-      ativo: c.ativo
-    });
-
-    if(error) return alert("Erro: " + error.message);
-    await refreshAll();
+    try{
+      await apiFetch("/api/admin/categorias", {
+        method:"POST",
+        body:{ cliente_slug: c.cliente_slug, nome: c.nome + " (cópia)", ordem: Number(c.ordem||0) + 1, ativo: !!c.ativo }
+      });
+      await refreshAll();
+    }catch(err){ alert(err.message || String(err)); }
   };
 
   window.deleteCategoria = async (id) => {
     const c = CATEGORIAS.find(x => Number(x.id) === Number(id));
     if(!c) return;
+    if(!confirm(`Excluir categoria "${c.nome}"? (produtos ligados serão removidos)`)) return;
 
-    if(!confirm(`Excluir categoria "${c.nome}"?\n\nIsso tentará apagar produtos dessa categoria.`)) return;
-
-    await supabaseClient.from("produtos").delete().eq("categoria_id", c.id);
-
-    const { error } = await supabaseClient.from("categorias").delete().eq("id", c.id);
-    if(error) return alert("Erro: " + error.message);
-
-    await refreshAll();
+    try{
+      await apiFetch("/api/admin/categorias", { method:"DELETE", body:{ id: c.id } });
+      await refreshAll();
+    }catch(err){ alert(err.message || String(err)); }
   };
+
+  // ======================================
+  // PRODUTOS
+  // ======================================
+  $("prodCliente").addEventListener("change", loadCategoriasSelectProduto);
+  $("btnSalvarProduto").addEventListener("click", salvarProduto);
+  $("filtroProdCliente").addEventListener("change", renderProdutos);
+  $("filtroProduto").addEventListener("input", renderProdutos);
+
+  async function loadCategoriasSelectProduto(){
+    const slug = $("prodCliente").value;
+    $("prodCategoria").innerHTML = `<option value="">Selecione a categoria</option>`;
+    if(!slug) return;
+
+    const cats = CATEGORIAS.filter(c => c.cliente_slug === slug).sort((a,b)=>(a.ordem||0)-(b.ordem||0));
+    const opts = cats.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
+    $("prodCategoria").innerHTML = `<option value="">Selecione a categoria</option>` + opts;
+  }
+
+  async function salvarProduto(){
+    clearMsg($("msgProduto"));
+
+    const cliente_slug = $("prodCliente").value;
+    const categoria_id = $("prodCategoria").value;
+    const nome = $("prodNome").value.trim();
+    const preco = Number($("prodPreco").value || 0);
+    const imagem = $("prodImg").value.trim() || null;
+    const ativo = $("prodAtivo").value === "true";
+    const descricao = $("prodDesc").value.trim();
+
+    if(!cliente_slug || !categoria_id || !nome || !preco){
+      showMsg($("msgProduto"), "err", "Preencha cliente, categoria, nome e preço.");
+      return;
+    }
+
+    const btn = $("btnSalvarProduto");
+    setBtnLoading(btn, true);
+
+    try{
+      await apiFetch("/api/admin/produtos", {
+        method:"POST",
+        body:{
+          cliente_slug,
+          categoria_id: Number(categoria_id),
+          nome,
+          descricao,
+          preco,
+          imagem,
+          ativo,
+          ordem: 0
+        }
+      });
+
+      showMsg($("msgProduto"), "ok", "Produto criado!");
+      $("prodNome").value=""; $("prodPreco").value=""; $("prodImg").value=""; $("prodAtivo").value="true"; $("prodDesc").value="";
+      await refreshAll();
+    }catch(err){
+      console.error(err);
+      showMsg($("msgProduto"), "err", err.message || String(err));
+    }finally{
+      setBtnLoading(btn, false);
+    }
+  }
+
+  function nomeCategoriaById(id){
+    const c = CATEGORIAS.find(x => String(x.id) === String(id));
+    return c ? c.nome : "-";
+  }
+
+  function renderProdutos(){
+    const cliente = $("filtroProdCliente").value;
+    const q = ($("filtroProduto").value || "").trim().toLowerCase();
+
+    const rows = PRODUTOS
+      .filter(p => (!cliente || p.cliente_slug === cliente))
+      .filter(p => (!q || (p.nome||"").toLowerCase().includes(q)))
+      .map(p => `
+        <tr>
+          <td>${escapeHtml(p.cliente_slug)}</td>
+          <td>${escapeHtml(nomeCategoriaById(p.categoria_id))} <span class="muted">(#${p.categoria_id})</span></td>
+          <td>
+            <b>${escapeHtml(p.nome)}</b>
+            <div class="muted">${escapeHtml((p.descricao||"").slice(0,80))}${(p.descricao||"").length>80?"…":""}</div>
+          </td>
+          <td>${brl(p.preco)}</td>
+          <td>${tagAtivo(!!p.ativo)}</td>
+          <td>
+            <div class="actions">
+              <button class="btn primary small" type="button" onclick="openEditProduto(${p.id})">Editar</button>
+              <button class="btn small" type="button" onclick="duplicateProduto(${p.id})">Duplicar</button>
+              <button class="btn danger small" type="button" onclick="deleteProduto(${p.id})">Excluir</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+    $("tbProdutos").innerHTML = rows || `<tr><td colspan="6" class="muted">Nenhum produto.</td></tr>`;
+  }
 
   window.openEditProduto = (id) => {
     const p = PRODUTOS.find(x => Number(x.id) === Number(id));
@@ -1416,10 +1315,10 @@
 
         if(!cliente_slug || !categoria_id || !nome || !preco) throw new Error("Preencha cliente, categoria, nome e preço.");
 
-        const { error } = await supabaseClient.from("produtos")
-          .update({ cliente_slug, categoria_id, ativo, nome, preco, imagem, descricao })
-          .eq("id", p.id);
-        if(error) throw error;
+        await apiFetch("/api/admin/produtos", {
+          method:"PATCH",
+          body:{ id: p.id, cliente_slug, categoria_id, ativo, nome, preco, imagem, descricao }
+        });
 
         showMsg($("modalMsg"), "ok", "Produto atualizado!");
         await refreshAll();
@@ -1430,38 +1329,38 @@
   window.duplicateProduto = async (id) => {
     const p = PRODUTOS.find(x => Number(x.id) === Number(id));
     if(!p) return;
-
     if(!confirm(`Duplicar produto "${p.nome}"?`)) return;
 
-    const { error } = await supabaseClient.from("produtos").insert({
-      cliente_slug: p.cliente_slug,
-      categoria_id: p.categoria_id,
-      nome: p.nome + " (cópia)",
-      descricao: p.descricao || "",
-      preco: Number(p.preco || 0),
-      imagem: p.imagem || null,
-      ativo: p.ativo
-    });
-
-    if(error) return alert("Erro: " + error.message);
-    await refreshAll();
+    try{
+      await apiFetch("/api/admin/produtos", {
+        method:"POST",
+        body:{
+          cliente_slug: p.cliente_slug,
+          categoria_id: p.categoria_id,
+          nome: p.nome + " (cópia)",
+          descricao: p.descricao || "",
+          preco: Number(p.preco || 0),
+          imagem: p.imagem || null,
+          ativo: !!p.ativo,
+          ordem: Number(p.ordem || 0) + 1
+        }
+      });
+      await refreshAll();
+    }catch(err){ alert(err.message || String(err)); }
   };
 
   window.deleteProduto = async (id) => {
     const p = PRODUTOS.find(x => Number(x.id) === Number(id));
     if(!p) return;
-
     if(!confirm(`Excluir produto "${p.nome}"?`)) return;
 
-    const { error } = await supabaseClient.from("produtos").delete().eq("id", p.id);
-    if(error) return alert("Erro: " + error.message);
-
-    await refreshAll();
+    try{
+      await apiFetch("/api/admin/produtos", { method:"DELETE", body:{ id: p.id } });
+      await refreshAll();
+    }catch(err){ alert(err.message || String(err)); }
   };
 
-  // ===============================
-  // START: auto-login session
-  // ===============================
+  // Auto session
   (async () => {
     const { data } = await supabaseClient.auth.getSession();
     if(data?.session){
