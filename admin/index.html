@@ -5,7 +5,7 @@
   <title>Painel Alfa — Cardápio Digital</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- ✅ Supabase UMD (obrigatório p/ GitHub Pages) -->
+  <!-- ✅ Supabase UMD (compatível com GitHub Pages) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
@@ -21,8 +21,6 @@
       --ok: rgba(40, 209, 124, .14);
       --okStroke: rgba(40, 209, 124, .35);
       --shadow: 0 18px 60px rgba(0,0,0,.35);
-      --brand:#2c6cff;
-      --brand2:#00d4ff;
     }
     *{ box-sizing:border-box }
     body{
@@ -51,24 +49,17 @@
       gap:12px;
       flex-wrap:wrap;
     }
-    .brand{
-      display:flex;gap:14px;align-items:center;
-      min-width:260px;
-    }
+    .brand{display:flex;gap:14px;align-items:center;min-width:260px;}
     .logo{
       width:62px;height:62px;border-radius:18px;
       background:linear-gradient(135deg, rgba(44,108,255,.35), rgba(0,212,255,.20));
       border:1px dashed rgba(255,255,255,.35);
-      display:grid;place-items:center;
-      font-weight:900;letter-spacing:.5px;
-      user-select:none;
+      display:grid;place-items:center;font-weight:900;letter-spacing:.5px;user-select:none;
     }
     .top h1{margin:0;font-size:22px;line-height:1.1}
     .top p{margin:6px 0 0;color:var(--muted);font-size:13px}
 
-    .right{
-      display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:1;
-    }
+    .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:1;}
     .pill{
       display:flex;gap:8px;align-items:center;
       padding:10px 12px;border-radius:999px;
@@ -78,18 +69,13 @@
     }
     .pill b{color:var(--text)}
     .btn{
-      appearance:none;
-      border:1px solid var(--stroke);
+      appearance:none;border:1px solid var(--stroke);
       background:rgba(255,255,255,.08);
       color:var(--text);
-      padding:10px 14px;
-      border-radius:12px;
-      font-weight:900;
-      font-size:13px;
-      cursor:pointer;
+      padding:10px 14px;border-radius:12px;
+      font-weight:900;font-size:13px;cursor:pointer;
       transition:transform .05s ease, background .2s ease;
-      display:inline-flex;align-items:center;gap:8px;
-      user-select:none;
+      display:inline-flex;align-items:center;gap:8px;user-select:none;
     }
     .btn:hover{background:rgba(255,255,255,.12)}
     .btn:active{transform:translateY(1px)}
@@ -98,60 +84,36 @@
       border-color:rgba(0,0,0,0);
       color:#06101b;
     }
-    .btn.danger{
-      background:rgba(255,77,79,.14);
-      border-color:rgba(255,77,79,.25);
-    }
+    .btn.danger{background:rgba(255,77,79,.14);border-color:rgba(255,77,79,.25);}
     .btn[disabled]{opacity:.55;cursor:not-allowed}
 
     .panel{
-      margin-top:14px;
-      border-radius:24px;
+      margin-top:14px;border-radius:24px;
       background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
       border:1px solid var(--stroke);
       box-shadow:var(--shadow);
-      padding:18px;
-      backdrop-filter: blur(10px);
+      padding:18px;backdrop-filter: blur(10px);
     }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
-      align-items:start;
-    }
-    @media (max-width: 880px){
-      .grid{grid-template-columns:1fr}
-    }
-    label{
-      display:block;
-      margin-top:10px;
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-      letter-spacing:.2px;
-    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+    @media (max-width: 880px){ .grid{grid-template-columns:1fr} }
+
+    label{display:block;margin-top:10px;font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.2px;}
     input{
-      width:100%;
-      padding:12px 12px;
-      margin-top:6px;
-      border-radius:14px;
+      width:100%;padding:12px 12px;margin-top:6px;border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(6,16,27,.55);
-      color:var(--text);
-      outline:none;
+      color:var(--text);outline:none;
     }
-    input:focus{
-      border-color:rgba(44,108,255,.65);
-      background:rgba(6,16,27,.70);
-    }
+    input:focus{border-color:rgba(44,108,255,.65);background:rgba(6,16,27,.70);}
     .rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
     .alert{
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:16px;
+      margin-top:12px;padding:12px 14px;border-radius:16px;
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.06);
       display:none;
+      white-space:pre-wrap;
+      line-height:1.45;
     }
     .alert.show{display:block}
     .alert.err{background:var(--danger);border-color:var(--dangerStroke)}
@@ -177,7 +139,7 @@
       <div class="right">
         <div class="pill"><span class="muted">Status:</span> <b id="statusText">Deslogado</b></div>
         <div class="pill"><span class="muted">Projeto:</span> <b class="mono">rgsnmxspyywwouhcdwkj</b></div>
-        <button class="btn danger" id="btnLogout" onclick="logout()" disabled>🚪 Sair</button>
+        <button class="btn danger" id="btnLogout" type="button" disabled>🚪 Sair</button>
       </div>
     </header>
 
@@ -195,11 +157,12 @@
           <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
 
           <div class="rowBtns">
-            <button class="btn primary" id="btnLogin" onclick="loginEmail()">🔐 Entrar</button>
-            <button class="btn" id="btnGoogle" onclick="loginGoogle()">🟦 Entrar com Google</button>
+            <button class="btn primary" id="btnLogin" type="button">🔐 Entrar</button>
+            <button class="btn" id="btnGoogle" type="button">🟦 Entrar com Google</button>
           </div>
 
           <div class="alert err" id="loginAlert"></div>
+
           <div class="muted small" style="margin-top:10px">
             Dica: se o Google não voltar logado, confira no Supabase <b>URL Configuration</b> (Site URL e Redirect URLs).
           </div>
@@ -209,7 +172,8 @@
           <div class="muted small" style="line-height:1.55">
             <b>Checklist rápido:</b><br/>
             1) Provider Google ativado no Supabase (Client ID/Secret).<br/>
-            2) Callback no Google: <span class="mono">https://rgsnmxspyywwouhcdwkj.supabase.co/auth/v1/callback</span><br/>
+            2) Callback no Google:<br/>
+            <span class="mono">https://rgsnmxspyywwouhcdwkj.supabase.co/auth/v1/callback</span><br/>
             3) Redirect URLs no Supabase incluem:<br/>
             <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/admin/</span><br/>
             <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/*</span><br/>
@@ -218,51 +182,58 @@
       </div>
     </section>
 
-    <!-- APP (quando logar) -->
+    <!-- APP -->
     <section class="panel hidden" id="appPanel">
       <h2 style="margin:0 0 6px">Você está logado ✅</h2>
-      <div class="muted small">Daqui você pode chamar sua API (Vercel) com o Bearer token do usuário.</div>
+      <div class="muted small">Sessão ativa. Se quiser, daqui você chama sua API na Vercel com Bearer token.</div>
 
       <div class="alert ok show" id="appAlert" style="margin-top:12px">
-        Status OK. Agora conecte suas telas de Clientes/Categorias/Produtos.
+        OK. Login funcionando.
       </div>
 
       <div class="rowBtns">
-        <a class="btn" href="../">🏠 Voltar para Home</a>
+        <a class="btn" href="../" style="text-decoration:none">🏠 Voltar para Home</a>
+      </div>
+    </section>
+
+    <!-- DIAGNÓSTICO -->
+    <section class="panel" id="debugPanel">
+      <h3 style="margin:0 0 6px">Diagnóstico</h3>
+      <div class="muted small">Se algo “não fizer nada”, aqui vai mostrar a última ação e qualquer erro do JS.</div>
+      <div class="alert show" id="debugBox" style="display:block">
+        Carregando…
       </div>
     </section>
   </div>
 
 <script>
 /* ======================
-   CONFIG
+   CONFIG SUPABASE
 ====================== */
 const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
 
 /* ======================
-   GUARD: Supabase carregou?
+   DIAGNÓSTICO
 ====================== */
-(function guardSupabase(){
-  const a = document.getElementById("loginAlert");
-  if (!window.supabase || !window.supabase.createClient) {
-    a.classList.add("show","err");
-    a.textContent = "❌ Supabase SDK não carregou. Use o script UMD: /dist/umd/supabase.min.js";
-    throw new Error("Supabase SDK not loaded");
-  }
-})();
+const dbg = (msg) => {
+  const el = document.getElementById("debugBox");
+  const now = new Date().toLocaleTimeString("pt-BR");
+  el.textContent = `[${now}] ${msg}\n` + el.textContent.replace(/^Carregando…\n?/, "");
+};
+
+window.addEventListener("error", (e) => {
+  dbg("❌ window.onerror: " + (e.message || "erro") + (e.filename ? ` | ${e.filename}:${e.lineno}` : ""));
+  showAlert("Erro JS: " + (e.message || "erro desconhecido"));
+});
+
+window.addEventListener("unhandledrejection", (e) => {
+  dbg("❌ unhandledrejection: " + (e.reason?.message || String(e.reason)));
+  showAlert("Erro (Promise): " + (e.reason?.message || String(e.reason)));
+});
 
 /* ======================
-   CLIENT
-====================== */
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
-  { auth: { persistSession: true } }
-);
-
-/* ======================
-   UI Helpers
+   SUPABASE SDK GUARD
 ====================== */
 function showAlert(msg, type="err") {
   const a = document.getElementById("loginAlert");
@@ -272,82 +243,40 @@ function showAlert(msg, type="err") {
 function hideAlert() {
   const a = document.getElementById("loginAlert");
   a.textContent = "";
-  a.className = "alert";
+  a.className = "alert err";
+  a.classList.remove("show");
 }
-function setLoading(btnId, loadingText, isLoading){
-  const btn = document.getElementById(btnId);
+function setLoading(btn, text, isLoading){
   if(!btn) return;
   if(isLoading){
     btn.dataset._txt = btn.textContent;
-    btn.textContent = loadingText;
+    btn.textContent = text;
     btn.disabled = true;
-  }else{
+  } else {
     btn.textContent = btn.dataset._txt || btn.textContent;
     btn.disabled = false;
   }
 }
 
-/* ======================
-   AUTH: Email/Senha
-====================== */
-async function loginEmail(){
-  hideAlert();
-
-  const email = (document.getElementById("email").value || "").trim();
-  const password = document.getElementById("password").value || "";
-
-  if(!email || !password){
-    showAlert("Preencha email e senha.");
-    return;
-  }
-
-  setLoading("btnLogin", "Entrando...", true);
-
-  try{
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if(error) throw error;
-    onLogged(data.session);
-  }catch(e){
-    showAlert(e?.message || "Erro ao logar");
-  }finally{
-    setLoading("btnLogin", "Entrando...", false);
-  }
+if (!window.supabase || !window.supabase.createClient) {
+  showAlert("❌ Supabase SDK não carregou. Verifique o script UMD no <head>.");
+  dbg("Supabase SDK não carregou (window.supabase indefinido).");
+  throw new Error("Supabase SDK not loaded");
 }
+dbg("✅ Supabase SDK carregado.");
 
 /* ======================
-   AUTH: Google OAuth
+   CLIENT
 ====================== */
-async function loginGoogle(){
-  hideAlert();
-  setLoading("btnGoogle", "Abrindo Google...", true);
-
-  try{
-    // retorna para a própria página /admin/
-    const redirectTo = window.location.origin + window.location.pathname;
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo }
-    });
-
-    if(error) throw error;
-    // Se tudo ok, o navegador vai redirecionar para o Google e voltar.
-  }catch(e){
-    showAlert(e?.message || "Erro ao abrir login Google");
-    setLoading("btnGoogle", "Abrindo Google...", false);
-  }
-}
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  { auth: { persistSession: true } }
+);
+dbg("✅ Supabase client criado.");
 
 /* ======================
-   Logout
-====================== */
-async function logout(){
-  await supabase.auth.signOut();
-  onLogged(null);
-}
-
-/* ======================
-   UI State
+   UI STATE
 ====================== */
 function onLogged(session){
   const statusText = document.getElementById("statusText");
@@ -360,29 +289,109 @@ function onLogged(session){
     btnLogout.disabled = false;
     loginPanel.classList.add("hidden");
     appPanel.classList.remove("hidden");
-  }else{
+    dbg("✅ Sessão ativa: " + (session.user.email || session.user.id));
+  } else {
     statusText.textContent = "Deslogado";
     btnLogout.disabled = true;
     appPanel.classList.add("hidden");
     loginPanel.classList.remove("hidden");
+    dbg("ℹ️ Sem sessão.");
   }
 }
 
 /* ======================
-   INIT
+   AUTH ACTIONS
 ====================== */
-(async function init(){
+async function loginEmail(){
+  hideAlert();
+  const btn = document.getElementById("btnLogin");
+  const email = (document.getElementById("email").value || "").trim();
+  const password = document.getElementById("password").value || "";
+
+  dbg("➡️ Clique: Login Email/Senha");
+
+  if(!email || !password){
+    showAlert("Preencha email e senha.");
+    dbg("⚠️ Campos vazios.");
+    return;
+  }
+
+  setLoading(btn, "Entrando...", true);
+
+  try{
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error) throw error;
+    dbg("✅ signInWithPassword OK.");
+    onLogged(data.session);
+  }catch(e){
+    dbg("❌ signInWithPassword erro: " + (e?.message || "erro"));
+    showAlert(e?.message || "Erro ao logar");
+  }finally{
+    setLoading(btn, "Entrando...", false);
+  }
+}
+
+async function loginGoogle(){
+  hideAlert();
+  const btn = document.getElementById("btnGoogle");
+
+  dbg("➡️ Clique: Login Google");
+
+  setLoading(btn, "Abrindo Google...", true);
+
+  try{
+    const redirectTo = window.location.origin + window.location.pathname;
+    dbg("↪️ redirectTo: " + redirectTo);
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo }
+    });
+
+    if(error) throw error;
+
+    // Importante: normalmente o browser redireciona imediatamente
+    dbg("✅ signInWithOAuth disparado (deve redirecionar).");
+  }catch(e){
+    dbg("❌ signInWithOAuth erro: " + (e?.message || "erro"));
+    showAlert(e?.message || "Erro ao abrir login Google");
+    setLoading(btn, "Abrindo Google...", false);
+  }
+}
+
+async function logout(){
+  hideAlert();
+  dbg("➡️ Clique: Logout");
+  await supabase.auth.signOut();
+  onLogged(null);
+}
+
+/* ======================
+   BIND EVENTS (sem onclick inline)
+====================== */
+document.addEventListener("DOMContentLoaded", async () => {
+  dbg("✅ DOMContentLoaded");
+
+  document.getElementById("btnLogin").addEventListener("click", loginEmail);
+  document.getElementById("btnGoogle").addEventListener("click", loginGoogle);
+  document.getElementById("btnLogout").addEventListener("click", logout);
+
+  // ENTER para logar
+  document.getElementById("password").addEventListener("keydown", (e) => {
+    if(e.key === "Enter") loginEmail();
+  });
+
   // sessão atual
   const { data } = await supabase.auth.getSession();
   onLogged(data.session);
 
-  // ouvir mudanças
-  supabase.auth.onAuthStateChange((_event, session) => {
+  // mudanças de auth (quando volta do Google)
+  supabase.auth.onAuthStateChange((event, session) => {
+    dbg("🔔 AuthStateChange: " + event);
     onLogged(session);
-    // se voltou do Google, reabilita botão
-    setLoading("btnGoogle", "Abrindo Google...", false);
+    setLoading(document.getElementById("btnGoogle"), "Abrindo Google...", false);
   });
-})();
+});
 </script>
 </body>
 </html>
