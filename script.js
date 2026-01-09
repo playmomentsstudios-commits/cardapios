@@ -1,47 +1,72 @@
-// CONFIGURAÇÃO DO SUPABASE (Substitua pelos seus dados)
+// ===== CONFIGURAÇÃO SUPABASE =====
 const SUPABASE_URL = 'https://rgsnmxspyywwouhcdwkj.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1I';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== FUNÇÃO PRINCIPAL =====
 async function carregarCardapio() {
-    // 1. Pega o nome do cliente pela URL (ex: site.com/?u=pizzaria_do_ze)
     const params = new URLSearchParams(window.location.search);
     const clienteSlug = params.get('u');
 
     if (!clienteSlug) {
-        document.body.innerHTML = "<h1>Erro: Cliente não identificado.</h1>";
+        document.body.innerHTML = `
+            <h2 style="text-align:center;margin-top:50px;">
+                Cliente não identificado ❌
+            </h2>
+        `;
         return;
     }
 
-    document.getElementById('nome-loja').innerText = clienteSlug.replace('_', ' ').toUpperCase();
+    // Nome da loja
+    const nomeFormatado = clienteSlug.replace(/_/g, ' ');
+    document.getElementById('nome-loja').innerText = nomeFormatado.toUpperCase();
 
-    // 2. Busca no banco de dados
-    // Filtra pela coluna 'slug' (você deve ter essa coluna na tabela Cardapio)
-    const { data: produtos, error } = await supabase
+    // Busca no Supabase
+    const { data: produtos, error } = await supabaseClient
         .from('Cardapio')
         .select('*')
-        .eq('slug', clienteSlug);
+        .eq('slug', clienteSlug)
+        .order('nome', { ascending: true });
+
+    const container = document.getElementById('cardapio');
+    container.innerHTML = '';
 
     if (error) {
-        console.error('Erro ao buscar dados:', error);
+        console.error(error);
+        container.innerHTML = `
+            <div class="loader">
+                Erro ao carregar o cardápio 😕
+            </div>
+        `;
         return;
     }
 
-    // 3. Renderiza os produtos na tela
-    const container = document.getElementById('cardapio');
-    container.innerHTML = ''; // Limpa o loader
-
-    produtos.forEach(item => {
-        const card = `
-            <div class="produto-card">
-                <div class="produto-info">
-                    <h3>${item.nome}</h3>
-                    <p>${item.descricao || ''}</p>
-                </div>
-                <div class="preco">R$ ${item.preco.toFixed(2)}</div>
+    if (!produtos || produtos.length === 0) {
+        container.innerHTML = `
+            <div class="loader">
+                Nenhum produto disponível no momento.
             </div>
         `;
-        container.innerHTML += card;
+        return;
+    }
+
+    // Renderização
+    produtos.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'produto-card';
+
+        card.innerHTML = `
+            <div class="produto-info">
+                <h3>${item.nome}</h3>
+                <p>${item.descricao || ''}</p>
+            </div>
+            <div class="preco">
+                R$ ${Number(item.preco).toFixed(2)}
+            </div>
+        `;
+
+        container.appendChild(card);
     });
 }
 
