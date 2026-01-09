@@ -5,109 +5,232 @@
   <title>Painel Alfa — Cardápio Digital</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- ✅ SUPABASE UMD (OBRIGATÓRIO PARA GITHUB PAGES) -->
+  <!-- ✅ Supabase UMD (obrigatório p/ GitHub Pages) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #0a1625, #020812);
-      color: #fff;
+    :root{
+      --bg1:#06101b;
+      --bg2:#040a12;
+      --panel:rgba(255,255,255,.07);
+      --stroke:rgba(255,255,255,.10);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --danger: rgba(255, 77, 79, .14);
+      --dangerStroke: rgba(255, 77, 79, .35);
+      --ok: rgba(40, 209, 124, .14);
+      --okStroke: rgba(40, 209, 124, .35);
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --brand:#2c6cff;
+      --brand2:#00d4ff;
     }
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px;
+    *{ box-sizing:border-box }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(44,108,255,.25), transparent 60%),
+        radial-gradient(1000px 600px at 90% 20%, rgba(0,212,255,.18), transparent 55%),
+        radial-gradient(900px 600px at 50% 90%, rgba(40,209,124,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
     }
-    .card {
-      background: rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    .wrap{max-width:1100px;margin:0 auto;padding:22px 18px 56px}
+
+    .top{
+      border-radius:24px;
+      background:linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      border:1px solid var(--stroke);
+      box-shadow:var(--shadow);
+      padding:18px;
+      backdrop-filter: blur(10px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
-    h1 { margin-top: 0; }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-size: 14px;
-      opacity: .8;
+    .brand{
+      display:flex;gap:14px;align-items:center;
+      min-width:260px;
     }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(0,0,0,0.4);
-      color: #fff;
-      margin-top: 6px;
+    .logo{
+      width:62px;height:62px;border-radius:18px;
+      background:linear-gradient(135deg, rgba(44,108,255,.35), rgba(0,212,255,.20));
+      border:1px dashed rgba(255,255,255,.35);
+      display:grid;place-items:center;
+      font-weight:900;letter-spacing:.5px;
+      user-select:none;
     }
-    button {
-      margin-top: 18px;
-      padding: 12px 18px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      background: linear-gradient(135deg, #2c6cff, #00d4ff);
-      color: #02121f;
+    .top h1{margin:0;font-size:22px;line-height:1.1}
+    .top p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    .right{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:1;
     }
-    button:disabled {
-      opacity: .6;
-      cursor: not-allowed;
+    .pill{
+      display:flex;gap:8px;align-items:center;
+      padding:10px 12px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      font-size:12px;color:var(--muted);
     }
-    .alert {
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 12px;
-      display: none;
+    .pill b{color:var(--text)}
+    .btn{
+      appearance:none;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:900;
+      font-size:13px;
+      cursor:pointer;
+      transition:transform .05s ease, background .2s ease;
+      display:inline-flex;align-items:center;gap:8px;
+      user-select:none;
     }
-    .alert.show { display: block; }
-    .alert.err { background: rgba(255,0,0,0.2); }
-    .alert.ok { background: rgba(0,200,120,0.2); }
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      opacity: .9;
+    .btn:hover{background:rgba(255,255,255,.12)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      background:linear-gradient(135deg, rgba(44,108,255,.95), rgba(0,212,255,.55));
+      border-color:rgba(0,0,0,0);
+      color:#06101b;
     }
-    .hidden { display: none; }
+    .btn.danger{
+      background:rgba(255,77,79,.14);
+      border-color:rgba(255,77,79,.25);
+    }
+    .btn[disabled]{opacity:.55;cursor:not-allowed}
+
+    .panel{
+      margin-top:14px;
+      border-radius:24px;
+      background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid var(--stroke);
+      box-shadow:var(--shadow);
+      padding:18px;
+      backdrop-filter: blur(10px);
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 880px){
+      .grid{grid-template-columns:1fr}
+    }
+    label{
+      display:block;
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    input{
+      width:100%;
+      padding:12px 12px;
+      margin-top:6px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(6,16,27,.55);
+      color:var(--text);
+      outline:none;
+    }
+    input:focus{
+      border-color:rgba(44,108,255,.65);
+      background:rgba(6,16,27,.70);
+    }
+    .rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .alert{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      display:none;
+    }
+    .alert.show{display:block}
+    .alert.err{background:var(--danger);border-color:var(--dangerStroke)}
+    .alert.ok{background:var(--ok);border-color:var(--okStroke)}
+    .muted{color:var(--muted)}
+    .hidden{display:none !important}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .small{font-size:12px}
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="top">
-      <div>
-        <strong>Status:</strong>
-        <span id="statusText">Deslogado</span>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">LOGO</div>
+        <div>
+          <h1>Painel Alfa — Cardápio Digital</h1>
+          <p class="muted">Super Admin • Login via Supabase Auth (Email/Senha ou Google)</p>
+        </div>
       </div>
-      <button id="btnLogout" onclick="logout()" disabled>Sair</button>
-    </div>
+
+      <div class="right">
+        <div class="pill"><span class="muted">Status:</span> <b id="statusText">Deslogado</b></div>
+        <div class="pill"><span class="muted">Projeto:</span> <b class="mono">rgsnmxspyywwouhcdwkj</b></div>
+        <button class="btn danger" id="btnLogout" onclick="logout()" disabled>🚪 Sair</button>
+      </div>
+    </header>
 
     <!-- LOGIN -->
-    <div class="card" id="loginCard">
-      <h1>Login</h1>
-      <p>Use um usuário do <b>Supabase Auth</b>.</p>
+    <section class="panel" id="loginPanel">
+      <h2 style="margin:0 0 6px">Login</h2>
+      <div class="muted small">Você pode entrar com email/senha (Supabase Auth) ou com Google.</div>
 
-      <label>Email</label>
-      <input id="email" type="email" placeholder="seu@email.com">
+      <div class="grid" style="margin-top:12px">
+        <div>
+          <label>Email</label>
+          <input id="email" type="email" placeholder="seu@email.com" autocomplete="email" />
 
-      <label>Senha</label>
-      <input id="password" type="password" placeholder="••••••••">
+          <label>Senha</label>
+          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
 
-      <button id="btnLogin" onclick="login()">Entrar</button>
+          <div class="rowBtns">
+            <button class="btn primary" id="btnLogin" onclick="loginEmail()">🔐 Entrar</button>
+            <button class="btn" id="btnGoogle" onclick="loginGoogle()">🟦 Entrar com Google</button>
+          </div>
 
-      <div class="alert err" id="loginAlert"></div>
-    </div>
+          <div class="alert err" id="loginAlert"></div>
+          <div class="muted small" style="margin-top:10px">
+            Dica: se o Google não voltar logado, confira no Supabase <b>URL Configuration</b> (Site URL e Redirect URLs).
+          </div>
+        </div>
 
-    <!-- PAINEL (SÓ APÓS LOGIN) -->
-    <div class="card hidden" id="panelCard">
-      <h1>Painel carregado ✅</h1>
-      <p>Se você está vendo isso, o login funcionou.</p>
-      <p>Agora o frontend pode chamar a API com Bearer token.</p>
-    </div>
+        <div>
+          <div class="muted small" style="line-height:1.55">
+            <b>Checklist rápido:</b><br/>
+            1) Provider Google ativado no Supabase (Client ID/Secret).<br/>
+            2) Callback no Google: <span class="mono">https://rgsnmxspyywwouhcdwkj.supabase.co/auth/v1/callback</span><br/>
+            3) Redirect URLs no Supabase incluem:<br/>
+            <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/admin/</span><br/>
+            <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/*</span><br/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APP (quando logar) -->
+    <section class="panel hidden" id="appPanel">
+      <h2 style="margin:0 0 6px">Você está logado ✅</h2>
+      <div class="muted small">Daqui você pode chamar sua API (Vercel) com o Bearer token do usuário.</div>
+
+      <div class="alert ok show" id="appAlert" style="margin-top:12px">
+        Status OK. Agora conecte suas telas de Clientes/Categorias/Produtos.
+      </div>
+
+      <div class="rowBtns">
+        <a class="btn" href="../">🏠 Voltar para Home</a>
+      </div>
+    </section>
   </div>
 
 <script>
@@ -120,12 +243,14 @@ const SUPABASE_ANON_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
 /* ======================
    GUARD: Supabase carregou?
 ====================== */
-if (!window.supabase || !window.supabase.createClient) {
+(function guardSupabase(){
   const a = document.getElementById("loginAlert");
-  a.classList.add("show","err");
-  a.textContent = "❌ Supabase SDK não carregou. Use /dist/umd/supabase.min.js";
-  throw new Error("Supabase SDK not loaded");
-}
+  if (!window.supabase || !window.supabase.createClient) {
+    a.classList.add("show","err");
+    a.textContent = "❌ Supabase SDK não carregou. Use o script UMD: /dist/umd/supabase.min.js";
+    throw new Error("Supabase SDK not loaded");
+  }
+})();
 
 /* ======================
    CLIENT
@@ -137,7 +262,7 @@ const supabase = window.supabase.createClient(
 );
 
 /* ======================
-   HELPERS
+   UI Helpers
 ====================== */
 function showAlert(msg, type="err") {
   const a = document.getElementById("loginAlert");
@@ -146,64 +271,117 @@ function showAlert(msg, type="err") {
 }
 function hideAlert() {
   const a = document.getElementById("loginAlert");
-  a.className = "alert";
   a.textContent = "";
+  a.className = "alert";
+}
+function setLoading(btnId, loadingText, isLoading){
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  if(isLoading){
+    btn.dataset._txt = btn.textContent;
+    btn.textContent = loadingText;
+    btn.disabled = true;
+  }else{
+    btn.textContent = btn.dataset._txt || btn.textContent;
+    btn.disabled = false;
+  }
 }
 
 /* ======================
-   AUTH
+   AUTH: Email/Senha
 ====================== */
-async function login() {
+async function loginEmail(){
   hideAlert();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
 
-  if (!email || !password) {
-    showAlert("Preencha email e senha");
+  const email = (document.getElementById("email").value || "").trim();
+  const password = document.getElementById("password").value || "";
+
+  if(!email || !password){
+    showAlert("Preencha email e senha.");
     return;
   }
 
-  const btn = document.getElementById("btnLogin");
-  btn.disabled = true;
-  btn.textContent = "Entrando...";
+  setLoading("btnLogin", "Entrando...", true);
 
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email, password
-    });
-    if (error) throw error;
+  try{
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error) throw error;
     onLogged(data.session);
-  } catch (e) {
-    showAlert(e.message || "Erro ao logar");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Entrar";
+  }catch(e){
+    showAlert(e?.message || "Erro ao logar");
+  }finally{
+    setLoading("btnLogin", "Entrando...", false);
   }
 }
 
-async function logout() {
+/* ======================
+   AUTH: Google OAuth
+====================== */
+async function loginGoogle(){
+  hideAlert();
+  setLoading("btnGoogle", "Abrindo Google...", true);
+
+  try{
+    // retorna para a própria página /admin/
+    const redirectTo = window.location.origin + window.location.pathname;
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo }
+    });
+
+    if(error) throw error;
+    // Se tudo ok, o navegador vai redirecionar para o Google e voltar.
+  }catch(e){
+    showAlert(e?.message || "Erro ao abrir login Google");
+    setLoading("btnGoogle", "Abrindo Google...", false);
+  }
+}
+
+/* ======================
+   Logout
+====================== */
+async function logout(){
   await supabase.auth.signOut();
   onLogged(null);
 }
 
 /* ======================
-   UI STATE
+   UI State
 ====================== */
-function onLogged(session) {
-  document.getElementById("statusText").textContent =
-    session ? session.user.email : "Deslogado";
+function onLogged(session){
+  const statusText = document.getElementById("statusText");
+  const btnLogout = document.getElementById("btnLogout");
+  const loginPanel = document.getElementById("loginPanel");
+  const appPanel = document.getElementById("appPanel");
 
-  document.getElementById("btnLogout").disabled = !session;
-  document.getElementById("loginCard").classList.toggle("hidden", !!session);
-  document.getElementById("panelCard").classList.toggle("hidden", !session);
+  if(session?.user){
+    statusText.textContent = session.user.email || "Logado";
+    btnLogout.disabled = false;
+    loginPanel.classList.add("hidden");
+    appPanel.classList.remove("hidden");
+  }else{
+    statusText.textContent = "Deslogado";
+    btnLogout.disabled = true;
+    appPanel.classList.add("hidden");
+    loginPanel.classList.remove("hidden");
+  }
 }
 
 /* ======================
    INIT
 ====================== */
-(async () => {
+(async function init(){
+  // sessão atual
   const { data } = await supabase.auth.getSession();
   onLogged(data.session);
+
+  // ouvir mudanças
+  supabase.auth.onAuthStateChange((_event, session) => {
+    onLogged(session);
+    // se voltou do Google, reabilita botão
+    setLoading("btnGoogle", "Abrindo Google...", false);
+  });
 })();
 </script>
 </body>
