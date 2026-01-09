@@ -1,33 +1,60 @@
-const supabaseUrl = 'https://rgsnmxspyywwouhcdwkj.supabase.co';
-const supabaseKey = 'SUA_KEY_PUBLICA';
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+// ===============================
+// CONFIGURAÇÃO SUPABASE
+// ===============================
+const SUPABASE_URL = 'https://rgsnmxspyywwouhcdwkj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1';
 
-let carrinho = [];
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+// ===============================
+// VARIÁVEIS GLOBAIS
+// ===============================
 let clienteAtual = null;
+let carrinho = [];
 
-// ===== INIT =====
-(async function init() {
+// ===============================
+// INIT
+// ===============================
+document.addEventListener('DOMContentLoaded', init);
+
+async function init() {
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get('u') || 'cafeteria';
+  const slug = params.get('u') || 'cafeteria'; // fallback seguro
 
-  const { data: cliente } = await supabaseClient
+  await carregarCliente(slug);
+  await carregarCardapio(slug);
+}
+
+// ===============================
+// CLIENTE
+// ===============================
+async function carregarCliente(slug) {
+  const { data, error } = await supabaseClient
     .from('clientes')
     .select('*')
     .eq('slug', slug)
-    .single();
+    .limit(1);
 
-  if (!cliente) {
-    document.body.innerHTML = 'Cliente não encontrado';
-    return;
+  if (error || !data || data.length === 0) {
+    document.body.innerHTML = `
+      <h2 style="text-align:center;margin-top:50px">
+        Cliente não encontrado ❌<br>
+        <small>Slug: ${slug}</small>
+      </h2>
+    `;
+    throw new Error('Cliente não encontrado');
   }
 
-  clienteAtual = cliente;
-  document.getElementById('nome-loja').innerText = cliente.nome;
+  clienteAtual = data[0];
+  document.getElementById('nome-loja').innerText = clienteAtual.nome;
+}
 
-  carregarCardapio(slug);
-})();
-
-// ===== CARDÁPIO =====
+// ===============================
+// CARDÁPIO
+// ===============================
 async function carregarCardapio(slug) {
   const { data: categorias } = await supabaseClient
     .from('categorias')
@@ -44,6 +71,11 @@ async function carregarCardapio(slug) {
   const container = document.getElementById('conteudo');
   container.innerHTML = '';
 
+  if (!categorias || categorias.length === 0) {
+    container.innerHTML = '<p>Nenhuma categoria cadastrada.</p>';
+    return;
+  }
+
   categorias.forEach(cat => {
     const div = document.createElement('div');
     div.className = 'categoria';
@@ -54,12 +86,14 @@ async function carregarCardapio(slug) {
       .forEach(p => {
         div.innerHTML += `
           <div class="produto">
-            <img src="${p.imagem}">
+            <img src="${p.imagem || 'https://via.placeholder.com/80'}">
             <div>
               <strong>${p.nome}</strong>
               <p>${p.descricao || ''}</p>
-              <p>R$ ${p.preco.toFixed(2)}</p>
-              <button onclick='addCarrinho("${p.nome}", ${p.preco})'>Adicionar</button>
+              <p><b>R$ ${Number(p.preco).toFixed(2)}</b></p>
+              <button onclick="addCarrinho('${p.nome}', ${p.preco})">
+                Adicionar
+              </button>
             </div>
           </div>
         `;
@@ -69,7 +103,9 @@ async function carregarCardapio(slug) {
   });
 }
 
-// ===== CARRINHO =====
+// ===============================
+// CARRINHO
+// ===============================
 function addCarrinho(nome, preco) {
   carrinho.push({ nome, preco });
   atualizarTotal();
@@ -81,10 +117,19 @@ function atualizarTotal() {
     'R$ ' + total.toFixed(2);
 }
 
-// ===== WHATSAPP =====
+// ===============================
+// WHATSAPP
+// ===============================
 function finalizarPedido() {
+  if (!clienteAtual || carrinho.length === 0) {
+    alert('Carrinho vazio');
+    return;
+  }
+
   let msg = `Pedido - ${clienteAtual.nome}%0A%0A`;
-  carrinho.forEach(i => msg += `• ${i.nome} - R$ ${i.preco}%0A`);
+  carrinho.forEach(i => {
+    msg += `• ${i.nome} - R$ ${i.preco.toFixed(2)}%0A`;
+  });
 
   const total = carrinho.reduce((s, i) => s + i.preco, 0);
   msg += `%0ATotal: R$ ${total.toFixed(2)}`;
