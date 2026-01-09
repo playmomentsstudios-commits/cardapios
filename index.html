@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Cardápio Digital</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+  <meta charset="UTF-8">
+  <title>Cardápio Digital</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 <body>
 
 <header>
   <h1 id="nome-loja">Carregando...</h1>
 </header>
 
-<main id="conteudo"></main>
+<main id="conteudo">
+  <p style="text-align:center">Carregando cardápio...</p>
+</main>
 
 <div id="carrinho">
   <button onclick="finalizarPedido()">🛒 Finalizar Pedido</button>
