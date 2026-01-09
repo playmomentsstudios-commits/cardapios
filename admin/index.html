@@ -1,142 +1,210 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cardápio Digital</title>
+  <meta charset="utf-8" />
+  <title>Painel Alfa — Cardápio Digital</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- IMPORTANTE: paths RELATIVOS -->
-  <link rel="stylesheet" href="./style.css" />
+  <!-- ✅ SUPABASE UMD (OBRIGATÓRIO PARA GITHUB PAGES) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-  <!-- Supabase JS v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0a1625, #020812);
+      color: #fff;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    h1 { margin-top: 0; }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-size: 14px;
+      opacity: .8;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      margin-top: 6px;
+    }
+    button {
+      margin-top: 18px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      background: linear-gradient(135deg, #2c6cff, #00d4ff);
+      color: #02121f;
+    }
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+    .alert {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      display: none;
+    }
+    .alert.show { display: block; }
+    .alert.err { background: rgba(255,0,0,0.2); }
+    .alert.ok { background: rgba(0,200,120,0.2); }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      opacity: .9;
+    }
+    .hidden { display: none; }
+  </style>
 </head>
 
 <body>
-  <header>
-    <h1 id="nomeLoja">Carregando cardápio...</h1>
-  </header>
+  <div class="container">
+    <div class="top">
+      <div>
+        <strong>Status:</strong>
+        <span id="statusText">Deslogado</span>
+      </div>
+      <button id="btnLogout" onclick="logout()" disabled>Sair</button>
+    </div>
 
-  <main id="categorias"></main>
+    <!-- LOGIN -->
+    <div class="card" id="loginCard">
+      <h1>Login</h1>
+      <p>Use um usuário do <b>Supabase Auth</b>.</p>
 
-  <div id="carrinho">
-    <span id="total">Total: R$ 0,00</span>
-    <button id="finalizar">Finalizar pedido</button>
+      <label>Email</label>
+      <input id="email" type="email" placeholder="seu@email.com">
+
+      <label>Senha</label>
+      <input id="password" type="password" placeholder="••••••••">
+
+      <button id="btnLogin" onclick="login()">Entrar</button>
+
+      <div class="alert err" id="loginAlert"></div>
+    </div>
+
+    <!-- PAINEL (SÓ APÓS LOGIN) -->
+    <div class="card hidden" id="panelCard">
+      <h1>Painel carregado ✅</h1>
+      <p>Se você está vendo isso, o login funcionou.</p>
+      <p>Agora o frontend pode chamar a API com Bearer token.</p>
+    </div>
   </div>
 
-  <script>
-    /* ================================
-       CONFIG SUPABASE
-    ================================= */
-    const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
+<script>
+/* ======================
+   CONFIG
+====================== */
+const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
 
-    const supabaseClient = supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+/* ======================
+   GUARD: Supabase carregou?
+====================== */
+if (!window.supabase || !window.supabase.createClient) {
+  const a = document.getElementById("loginAlert");
+  a.classList.add("show","err");
+  a.textContent = "❌ Supabase SDK não carregou. Use /dist/umd/supabase.min.js";
+  throw new Error("Supabase SDK not loaded");
+}
 
-    /* ================================
-       UTIL
-    ================================= */
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get("u") || "cafeteria";
+/* ======================
+   CLIENT
+====================== */
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  { auth: { persistSession: true } }
+);
 
-    const categoriasEl = document.getElementById("categorias");
-    const nomeLojaEl = document.getElementById("nomeLoja");
+/* ======================
+   HELPERS
+====================== */
+function showAlert(msg, type="err") {
+  const a = document.getElementById("loginAlert");
+  a.textContent = msg;
+  a.className = "alert show " + type;
+}
+function hideAlert() {
+  const a = document.getElementById("loginAlert");
+  a.className = "alert";
+  a.textContent = "";
+}
 
-    let carrinho = [];
+/* ======================
+   AUTH
+====================== */
+async function login() {
+  hideAlert();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-    function formatarPreco(v) {
-      return v.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-      });
-    }
+  if (!email || !password) {
+    showAlert("Preencha email e senha");
+    return;
+  }
 
-    /* ================================
-       CARREGAR DADOS
-    ================================= */
-    async function carregarCardapio() {
-      // Cliente
-      const { data: cliente, error: erroCliente } = await supabaseClient
-        .from("clientes")
-        .select("*")
-        .eq("slug", slug)
-        .single();
+  const btn = document.getElementById("btnLogin");
+  btn.disabled = true;
+  btn.textContent = "Entrando...";
 
-      if (erroCliente || !cliente) {
-        nomeLojaEl.textContent = "Loja não encontrada";
-        return;
-      }
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email, password
+    });
+    if (error) throw error;
+    onLogged(data.session);
+  } catch (e) {
+    showAlert(e.message || "Erro ao logar");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Entrar";
+  }
+}
 
-      nomeLojaEl.textContent = cliente.nome;
+async function logout() {
+  await supabase.auth.signOut();
+  onLogged(null);
+}
 
-      // Categorias
-      const { data: categorias } = await supabaseClient
-        .from("categorias")
-        .select("*")
-        .eq("cliente_slug", slug)
-        .eq("ativo", true)
-        .order("ordem");
+/* ======================
+   UI STATE
+====================== */
+function onLogged(session) {
+  document.getElementById("statusText").textContent =
+    session ? session.user.email : "Deslogado";
 
-      // Produtos
-      const { data: produtos } = await supabaseClient
-        .from("produtos")
-        .select("*")
-        .eq("cliente_slug", slug)
-        .eq("ativo", true);
+  document.getElementById("btnLogout").disabled = !session;
+  document.getElementById("loginCard").classList.toggle("hidden", !!session);
+  document.getElementById("panelCard").classList.toggle("hidden", !session);
+}
 
-      categoriasEl.innerHTML = "";
-
-      categorias.forEach(cat => {
-        const bloco = document.createElement("section");
-        bloco.innerHTML = `<h2>${cat.nome}</h2>`;
-
-        produtos
-          .filter(p => p.categoria_id === cat.id)
-          .forEach(p => {
-            const item = document.createElement("div");
-            item.className = "produto";
-            item.innerHTML = `
-              <strong>${p.nome}</strong>
-              <p>${p.descricao || ""}</p>
-              <span>${formatarPreco(p.preco)}</span>
-              <button>Adicionar</button>
-            `;
-
-            item.querySelector("button").onclick = () => {
-              carrinho.push(p);
-              atualizarTotal();
-            };
-
-            bloco.appendChild(item);
-          });
-
-        categoriasEl.appendChild(bloco);
-      });
-    }
-
-    function atualizarTotal() {
-      const total = carrinho.reduce((s, p) => s + p.preco, 0);
-      document.getElementById("total").textContent =
-        "Total: " + formatarPreco(total);
-    }
-
-    document.getElementById("finalizar").onclick = () => {
-      if (carrinho.length === 0) return;
-
-      const msg = carrinho
-        .map(p => `• ${p.nome} - ${formatarPreco(p.preco)}`)
-        .join("%0A");
-
-      const total = carrinho.reduce((s, p) => s + p.preco, 0);
-
-      const texto = `Pedido:%0A${msg}%0A%0ATotal: ${formatarPreco(total)}`;
-      window.open(`https://wa.me/55${cliente.whatsapp}?text=${texto}`);
-    };
-
-    carregarCardapio();
-  </script>
+/* ======================
+   INIT
+====================== */
+(async () => {
+  const { data } = await supabase.auth.getSession();
+  onLogged(data.session);
+})();
+</script>
 </body>
 </html>
