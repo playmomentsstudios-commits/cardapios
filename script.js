@@ -1,73 +1,96 @@
-// ===== CONFIGURAÇÃO SUPABASE =====
-const SUPABASE_URL = 'https://rgsnmxspyywwouhcdwkj.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1I';
+const supabaseUrl = 'https://rgsnmxspyywwouhcdwkj.supabase.co';
+const supabaseKey = 'SUA_KEY_PUBLICA';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let carrinho = [];
+let clienteAtual = null;
 
-// ===== FUNÇÃO PRINCIPAL =====
-async function carregarCardapio() {
-    const params = new URLSearchParams(window.location.search);
-    const clienteSlug = params.get('u');
+// ===== INIT =====
+(async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('u') || 'cafeteria';
 
-    if (!clienteSlug) {
-        document.body.innerHTML = `
-            <h2 style="text-align:center;margin-top:50px;">
-                Cliente não identificado ❌
-            </h2>
-        `;
-        return;
-    }
+  const { data: cliente } = await supabaseClient
+    .from('clientes')
+    .select('*')
+    .eq('slug', slug)
+    .single();
 
-    // Nome da loja
-    const nomeFormatado = clienteSlug.replace(/_/g, ' ');
-    document.getElementById('nome-loja').innerText = nomeFormatado.toUpperCase();
+  if (!cliente) {
+    document.body.innerHTML = 'Cliente não encontrado';
+    return;
+  }
 
-    // Busca no Supabase
-    const { data: produtos, error } = await supabaseClient
-        .from('Cardapio')
-        .select('*')
-        .eq('slug', clienteSlug)
-        .order('nome', { ascending: true });
+  clienteAtual = cliente;
+  document.getElementById('nome-loja').innerText = cliente.nome;
 
-    const container = document.getElementById('cardapio');
-    container.innerHTML = '';
+  carregarCardapio(slug);
+})();
 
-    if (error) {
-        console.error(error);
-        container.innerHTML = `
-            <div class="loader">
-                Erro ao carregar o cardápio 😕
+// ===== CARDÁPIO =====
+async function carregarCardapio(slug) {
+  const { data: categorias } = await supabaseClient
+    .from('categorias')
+    .select('*')
+    .eq('cliente_slug', slug)
+    .order('ordem');
+
+  const { data: produtos } = await supabaseClient
+    .from('produtos')
+    .select('*')
+    .eq('cliente_slug', slug)
+    .eq('ativo', true);
+
+  const container = document.getElementById('conteudo');
+  container.innerHTML = '';
+
+  categorias.forEach(cat => {
+    const div = document.createElement('div');
+    div.className = 'categoria';
+    div.innerHTML = `<h2>${cat.nome}</h2>`;
+
+    produtos
+      .filter(p => p.categoria_id === cat.id)
+      .forEach(p => {
+        div.innerHTML += `
+          <div class="produto">
+            <img src="${p.imagem}">
+            <div>
+              <strong>${p.nome}</strong>
+              <p>${p.descricao || ''}</p>
+              <p>R$ ${p.preco.toFixed(2)}</p>
+              <button onclick='addCarrinho("${p.nome}", ${p.preco})'>Adicionar</button>
             </div>
+          </div>
         `;
-        return;
-    }
+      });
 
-    if (!produtos || produtos.length === 0) {
-        container.innerHTML = `
-            <div class="loader">
-                Nenhum produto disponível no momento.
-            </div>
-        `;
-        return;
-    }
-
-    // Renderização
-    produtos.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'produto-card';
-
-        card.innerHTML = `
-            <div class="produto-info">
-                <h3>${item.nome}</h3>
-                <p>${item.descricao || ''}</p>
-            </div>
-            <div class="preco">
-                R$ ${Number(item.preco).toFixed(2)}
-            </div>
-        `;
-
-        container.appendChild(card);
-    });
+    container.appendChild(div);
+  });
 }
 
-carregarCardapio();
+// ===== CARRINHO =====
+function addCarrinho(nome, preco) {
+  carrinho.push({ nome, preco });
+  atualizarTotal();
+}
+
+function atualizarTotal() {
+  const total = carrinho.reduce((s, i) => s + i.preco, 0);
+  document.getElementById('total').innerText =
+    'R$ ' + total.toFixed(2);
+}
+
+// ===== WHATSAPP =====
+function finalizarPedido() {
+  let msg = `Pedido - ${clienteAtual.nome}%0A%0A`;
+  carrinho.forEach(i => msg += `• ${i.nome} - R$ ${i.preco}%0A`);
+
+  const total = carrinho.reduce((s, i) => s + i.preco, 0);
+  msg += `%0ATotal: R$ ${total.toFixed(2)}`;
+
+  window.open(
+    `https://wa.me/55${clienteAtual.whatsapp}?text=${msg}`,
+    '_blank'
+  );
+}
