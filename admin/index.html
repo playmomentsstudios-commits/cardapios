@@ -2,27 +2,22 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Painel Alfa — Cardápio Digital (Novo)</title>
+  <title>Painel Alfa — Cardápio Digital</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- ✅ Supabase UMD (GitHub Pages friendly) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
     :root{
-      --bg1:#071322;
-      --bg2:#040b14;
+      --bg1:#071322; --bg2:#040b14;
       --panel:rgba(255,255,255,.07);
       --stroke:rgba(255,255,255,.12);
       --text:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.70);
-      --shadow: 0 18px 60px rgba(0,0,0,.35);
-      --dangerBG: rgba(255, 77, 79, .14);
-      --dangerStroke: rgba(255, 77, 79, .35);
-      --okBG: rgba(40, 209, 124, .14);
-      --okStroke: rgba(40, 209, 124, .35);
-      --brandA:#2c6cff;
-      --brandB:#00d4ff;
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --dangerBG:rgba(255,77,79,.14); --dangerStroke:rgba(255,77,79,.35);
+      --okBG:rgba(40,209,124,.14); --okStroke:rgba(40,209,124,.35);
+      --brandA:#2c6cff; --brandB:#00d4ff;
+      --warnBG:rgba(255, 193, 7, .14); --warnStroke:rgba(255, 193, 7, .35);
     }
     *{box-sizing:border-box}
     body{
@@ -36,7 +31,7 @@
         radial-gradient(900px 600px at 50% 90%, rgba(40,209,124,.10), transparent 60%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
     }
-    .wrap{max-width:1100px;margin:0 auto;padding:22px 16px 60px}
+    .wrap{max-width:1200px;margin:0 auto;padding:22px 16px 70px}
     .top{
       border-radius:24px;
       background:linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
@@ -47,7 +42,7 @@
       display:flex; align-items:center; justify-content:space-between;
       gap:12px; flex-wrap:wrap;
     }
-    .brand{display:flex;gap:14px;align-items:center;min-width:260px}
+    .brand{display:flex;gap:14px;align-items:center;min-width:280px}
     .logo{
       width:62px;height:62px;border-radius:18px;
       background:linear-gradient(135deg, rgba(44,108,255,.35), rgba(0,212,255,.20));
@@ -55,10 +50,13 @@
       display:grid;place-items:center;
       font-weight:900;letter-spacing:.4px;
       user-select:none;
+      overflow:hidden;
+      position:relative;
     }
+    .logo img{width:100%;height:100%;object-fit:cover;display:none}
+    .logo .txt{display:block}
     .top h1{margin:0;font-size:22px;line-height:1.1}
     .top p{margin:6px 0 0;color:var(--muted);font-size:13px}
-
     .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:1}
     .pill{
       display:flex;gap:8px;align-items:center;
@@ -68,6 +66,7 @@
       font-size:12px;color:var(--muted);
     }
     .pill b{color:var(--text)}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
     .btn{
       appearance:none;
       border:1px solid var(--stroke);
@@ -78,7 +77,7 @@
       font-weight:900;
       font-size:13px;
       cursor:pointer;
-      transition:transform .05s ease, background .2s ease;
+      transition:transform .05s ease, background .2s ease, opacity .2s ease;
       display:inline-flex;align-items:center;gap:8px;
       user-select:none;
     }
@@ -89,12 +88,10 @@
       border-color:transparent;
       color:#06101b;
     }
-    .btn.danger{
-      background:rgba(255,77,79,.14);
-      border-color:rgba(255,77,79,.25);
-    }
+    .btn.danger{background:rgba(255,77,79,.14);border-color:rgba(255,77,79,.25);}
+    .btn.ok{background:rgba(40,209,124,.14);border-color:rgba(40,209,124,.25);}
+    .btn.warn{background:rgba(255, 193, 7, .14);border-color:rgba(255, 193, 7, .25);}
     .btn[disabled]{opacity:.55;cursor:not-allowed}
-
     .panel{
       margin-top:14px;
       border-radius:24px;
@@ -104,12 +101,14 @@
       padding:18px;
       backdrop-filter: blur(10px);
     }
-
+    .hidden{display:none !important}
+    .small{font-size:12px}
+    .muted{color:var(--muted)}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
-    @media (max-width: 880px){ .grid{grid-template-columns:1fr} }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
 
     label{display:block;margin-top:10px;font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.2px;}
-    input{
+    input, select, textarea{
       width:100%;
       padding:12px 12px;
       margin-top:6px;
@@ -119,7 +118,11 @@
       color:var(--text);
       outline:none;
     }
-    input:focus{border-color:rgba(44,108,255,.65);background:rgba(6,16,27,.72);}
+    textarea{min-height:92px;resize:vertical}
+    input:focus, select:focus, textarea:focus{
+      border-color:rgba(44,108,255,.65);
+      background:rgba(6,16,27,.72);
+    }
 
     .rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .alert{
@@ -136,15 +139,85 @@
     .alert.show{display:block}
     .alert.err{background:var(--dangerBG);border-color:var(--dangerStroke)}
     .alert.ok{background:var(--okBG);border-color:var(--okStroke)}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
-    .muted{color:var(--muted)}
-    .hidden{display:none !important}
-    .small{font-size:12px}
+    .alert.warn{background:var(--warnBG);border-color:var(--warnStroke)}
 
-    .kv{display:grid;grid-template-columns:160px 1fr;gap:8px 10px;margin-top:12px}
-    .kv div{padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04)}
-    .kv .k{color:var(--muted);font-weight:900;font-size:12px}
-    .kv .v{font-size:12px;word-break:break-all}
+    /* Summary cards */
+    .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}
+    @media (max-width: 980px){ .summary{grid-template-columns:1fr} }
+    .card{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      padding:14px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .card h3{margin:0;font-size:13px;color:var(--muted);font-weight:900;letter-spacing:.2px}
+    .card .num{font-size:26px;font-weight:900;line-height:1}
+    .tabs{
+      display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+      margin-top:14px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      padding:10px;border-radius:999px;
+    }
+    .tab{
+      padding:10px 14px;border-radius:999px;border:1px solid transparent;
+      background:rgba(255,255,255,.06);
+      cursor:pointer;font-weight:900;font-size:13px;color:var(--muted);
+    }
+    .tab.active{
+      color:var(--text);
+      background:rgba(255,255,255,.10);
+      border-color:rgba(255,255,255,.14);
+    }
+
+    /* Table */
+    .tableWrap{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      overflow:hidden;
+      margin-top:12px;
+    }
+    table{width:100%;border-collapse:collapse}
+    th, td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+    th{color:var(--muted);text-align:left;font-weight:900}
+    tr:hover td{background:rgba(255,255,255,.03)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{
+      font-size:12px;font-weight:900;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      display:inline-flex;align-items:center;gap:6px;
+    }
+    .chip.on{background:rgba(40,209,124,.14);border-color:rgba(40,209,124,.25)}
+    .chip.off{background:rgba(255,77,79,.14);border-color:rgba(255,77,79,.25)}
+    .toggle{
+      display:inline-flex;align-items:center;gap:8px;
+      cursor:pointer;
+      user-select:none;
+      font-weight:900;
+    }
+    .switch{
+      width:44px;height:24px;border-radius:999px;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.16);
+      position:relative;
+    }
+    .switch::after{
+      content:"";
+      width:18px;height:18px;border-radius:50%;
+      background:rgba(255,255,255,.85);
+      position:absolute;top:50%;left:3px;
+      transform:translateY(-50%);
+      transition:all .18s ease;
+    }
+    .switch.on{
+      background:rgba(40,209,124,.25);
+      border-color:rgba(40,209,124,.35);
+    }
+    .switch.on::after{left:23px;background:rgba(255,255,255,.95)}
   </style>
 </head>
 
@@ -153,10 +226,13 @@
 
   <header class="top">
     <div class="brand">
-      <div class="logo">LOGO</div>
+      <div class="logo" id="logoBox">
+        <span class="txt">LOGO</span>
+        <img id="logoImg" alt="Logo" />
+      </div>
       <div>
         <h1>Painel Alfa — Cardápio Digital</h1>
-        <p class="muted">Admin novo • Supabase Auth (Email/Senha + Google) • Sem travar</p>
+        <p class="muted">Super Admin • CRUD seguro via Vercel (service role) • Token via Supabase Auth</p>
       </div>
     </div>
 
@@ -170,7 +246,7 @@
   <!-- LOGIN -->
   <section class="panel" id="loginPanel">
     <h2 style="margin:0 0 6px">Login</h2>
-    <div class="muted small">Entre com email/senha (Supabase Auth) ou com Google.</div>
+    <div class="muted small">Entre com email/senha ou Google. Depois que logar, o painel CRUD aparece.</div>
 
     <div class="grid" style="margin-top:12px">
       <div>
@@ -186,67 +262,267 @@
         </div>
 
         <div class="alert err" id="alertLogin"></div>
-
-        <div class="muted small" style="margin-top:10px">
-          Se “clicar e não acontecer nada”, veja a caixa <b>Diagnóstico</b> abaixo — ela mostra o erro real.
-        </div>
       </div>
 
       <div>
         <div class="muted small" style="line-height:1.6">
-          <b>Checklist:</b><br/>
-          • Provider Google ativado no Supabase (Client ID/Secret).<br/>
+          <b>Checklist (Google):</b><br/>
           • Callback no Google:<br/>
           <span class="mono">https://rgsnmxspyywwouhcdwkj.supabase.co/auth/v1/callback</span><br/>
-          • Redirect URLs no Supabase (Auth → URL Configuration):<br/>
+          • Redirect URLs no Supabase incluem:<br/>
           <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/admin/</span><br/>
-          <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/*</span><br/>
+          <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/*</span><br/><br/>
+          <b>Observação:</b> este painel usa o token do usuário para chamar sua API Vercel com Bearer.
         </div>
       </div>
     </div>
   </section>
 
-  <!-- LOGADO -->
+  <!-- APP -->
   <section class="panel hidden" id="appPanel">
-    <h2 style="margin:0 0 6px">Logado ✅</h2>
-    <div class="muted small">Sessão capturada com sucesso. Próximo passo é ligar seu CRUD pela API Vercel.</div>
 
-    <div class="alert ok show" id="alertOk" style="display:block;margin-top:12px">
-      Login funcionando. Se sua API responder “Missing Bearer token”, é porque o front não enviou o token.
+    <!-- Summary -->
+    <div class="summary">
+      <div class="card">
+        <div>
+          <h3>Clientes</h3>
+          <div class="num" id="countClientes">—</div>
+        </div>
+        <button class="btn" id="btnRefreshAll" type="button">🔄 Atualizar tudo</button>
+      </div>
+      <div class="card">
+        <div>
+          <h3>Categorias</h3>
+          <div class="num" id="countCategorias">—</div>
+        </div>
+        <button class="btn" id="btnCopyToken" type="button">📋 Copiar token</button>
+      </div>
+      <div class="card">
+        <div>
+          <h3>Produtos</h3>
+          <div class="num" id="countProdutos">—</div>
+        </div>
+        <a class="btn" href="../" style="text-decoration:none">🏠 Home</a>
+      </div>
     </div>
 
-    <div class="kv" id="sessionBox"></div>
-
-    <div class="rowBtns" style="margin-top:14px">
-      <button class="btn" id="btnCopyToken" type="button">📋 Copiar token</button>
-      <button class="btn" id="btnPingApi" type="button">🔌 Testar API (ping)</button>
-      <a class="btn" href="../" style="text-decoration:none">🏠 Voltar para Home</a>
+    <!-- Tabs -->
+    <div class="tabs" style="margin-top:14px">
+      <button class="tab active" data-tab="clientes" type="button">Clientes</button>
+      <button class="tab" data-tab="categorias" type="button">Categorias</button>
+      <button class="tab" data-tab="produtos" type="button">Produtos</button>
     </div>
 
-    <div class="alert err" id="alertApi"></div>
-  </section>
+    <div class="alert err" id="alertApp"></div>
 
-  <!-- DIAGNÓSTICO -->
-  <section class="panel" id="debugPanel">
-    <h3 style="margin:0 0 6px">Diagnóstico</h3>
-    <div class="muted small">Aqui aparece cada clique, redirecionamento, sessão e qualquer erro do JS.</div>
-    <div class="alert show" id="debugBox" style="display:block">Iniciando…</div>
+    <!-- CLIENTES -->
+    <div id="tab-clientes" style="margin-top:14px">
+      <div class="panel" style="margin-top:0">
+        <h2 style="margin:0">Clientes</h2>
+        <div class="muted small">Criar, editar, duplicar, excluir e ativar/desativar clientes.</div>
+
+        <div class="grid" style="margin-top:12px">
+          <div>
+            <label>Nome do negócio</label>
+            <input id="cli_nome" placeholder="Ex: Cafeteria do João" />
+
+            <label>Slug (url)</label>
+            <input id="cli_slug" placeholder="Ex: cafeteria-do-joao" />
+
+            <label>WhatsApp (somente números)</label>
+            <input id="cli_whats" placeholder="Ex: 62999999999" />
+
+            <label>Status</label>
+            <select id="cli_ativo">
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </select>
+
+            <div class="rowBtns">
+              <button class="btn primary" id="btnCliSalvar" type="button">💾 Salvar cliente</button>
+              <button class="btn" id="btnCliLimpar" type="button">🧹 Limpar</button>
+            </div>
+
+            <div class="muted small" style="margin-top:10px">
+              Link publicado: <span class="mono" id="cli_link">—</span>
+            </div>
+          </div>
+
+          <div>
+            <label>Buscar</label>
+            <input id="cli_busca" placeholder="Buscar por nome ou slug..." />
+            <div class="rowBtns">
+              <button class="btn" id="btnCliRecarregar" type="button">🔄 Recarregar</button>
+            </div>
+
+            <div class="tableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Slug</th>
+                    <th>WhatsApp</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="cli_tbody">
+                  <tr><td colspan="5" class="muted">Carregando…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORIAS -->
+    <div id="tab-categorias" class="hidden" style="margin-top:14px">
+      <div class="panel" style="margin-top:0">
+        <h2 style="margin:0">Categorias</h2>
+        <div class="muted small">Categorias por cliente (ordem + ativo/inativo).</div>
+
+        <div class="grid" style="margin-top:12px">
+          <div>
+            <label>Cliente</label>
+            <select id="cat_cliente"></select>
+
+            <label>Nome da categoria</label>
+            <input id="cat_nome" placeholder="Ex: Bebidas, Doces…" />
+
+            <label>Ordem</label>
+            <input id="cat_ordem" placeholder="Ex: 1" />
+
+            <label>Status</label>
+            <select id="cat_ativo">
+              <option value="true">Ativa</option>
+              <option value="false">Inativa</option>
+            </select>
+
+            <div class="rowBtns">
+              <button class="btn primary" id="btnCatSalvar" type="button">💾 Salvar categoria</button>
+              <button class="btn" id="btnCatLimpar" type="button">🧹 Limpar</button>
+            </div>
+          </div>
+
+          <div>
+            <label>Buscar</label>
+            <input id="cat_busca" placeholder="Buscar por nome..." />
+            <div class="rowBtns">
+              <button class="btn" id="btnCatRecarregar" type="button">🔄 Recarregar</button>
+            </div>
+
+            <div class="tableWrap">
+              <table>
+                <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Categoria</th>
+                  <th>Ordem</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="cat_tbody">
+                  <tr><td colspan="5" class="muted">Carregando…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PRODUTOS -->
+    <div id="tab-produtos" class="hidden" style="margin-top:14px">
+      <div class="panel" style="margin-top:0">
+        <h2 style="margin:0">Produtos</h2>
+        <div class="muted small">Produtos por cliente e categoria (preço, descrição, imagem, ativo/inativo).</div>
+
+        <div class="grid" style="margin-top:12px">
+          <div>
+            <label>Cliente</label>
+            <select id="pro_cliente"></select>
+
+            <label>Categoria</label>
+            <select id="pro_categoria"></select>
+
+            <label>Nome do produto</label>
+            <input id="pro_nome" placeholder="Ex: Cuscuz da Baiana" />
+
+            <label>Descrição</label>
+            <textarea id="pro_desc" placeholder="Opcional"></textarea>
+
+            <label>Preço (ex: 12.50)</label>
+            <input id="pro_preco" placeholder="12.50" />
+
+            <label>URL da imagem (opcional)</label>
+            <input id="pro_img" placeholder="https://..." />
+
+            <label>Status</label>
+            <select id="pro_ativo">
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </select>
+
+            <div class="rowBtns">
+              <button class="btn primary" id="btnProSalvar" type="button">💾 Salvar produto</button>
+              <button class="btn" id="btnProLimpar" type="button">🧹 Limpar</button>
+            </div>
+          </div>
+
+          <div>
+            <label>Buscar</label>
+            <input id="pro_busca" placeholder="Buscar por nome..." />
+            <div class="rowBtns">
+              <button class="btn" id="btnProRecarregar" type="button">🔄 Recarregar</button>
+            </div>
+
+            <div class="tableWrap">
+              <table>
+                <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Produto</th>
+                  <th>Categoria</th>
+                  <th>Preço</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="pro_tbody">
+                  <tr><td colspan="6" class="muted">Carregando…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Debug -->
+    <div class="panel" style="margin-top:14px">
+      <h3 style="margin:0 0 6px">Diagnóstico</h3>
+      <div class="muted small">Aqui aparece carregamento, erros de API e sessão.</div>
+      <div class="alert show" id="debugBox" style="display:block">Iniciando…</div>
+    </div>
+
   </section>
 
 </div>
 
 <script>
 /* =========================
-   CONFIG (SEUS DADOS)
+   CONFIG
 ========================= */
 const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
-
-// ✅ Se você tiver um domínio Vercel para sua API, coloque aqui (opcional)
 const API_BASE = "https://cafeteria-gamma-orpin.vercel.app"; // ajuste se necessário
 
 /* =========================
-   DIAGNÓSTICO
+   Helpers
 ========================= */
 const dbgEl = () => document.getElementById("debugBox");
 function dbg(msg){
@@ -254,10 +530,10 @@ function dbg(msg){
   const el = dbgEl();
   el.textContent = `[${now}] ${msg}\n` + el.textContent.replace(/^Iniciando…\n?/, "");
 }
-function showAlert(id, msg, type){
+function showAlert(id, msg, type="err"){
   const el = document.getElementById(id);
   el.textContent = msg;
-  el.className = "alert show " + (type || "err");
+  el.className = "alert show " + type;
 }
 function hideAlert(id){
   const el = document.getElementById(id);
@@ -275,102 +551,655 @@ function setLoading(btn, text, on){
     btn.disabled = false;
   }
 }
-window.addEventListener("error", (e) => {
-  dbg("❌ window.onerror: " + (e.message || "erro") + (e.filename ? ` | ${e.filename}:${e.lineno}` : ""));
-  showAlert("alertLogin", "Erro JS: " + (e.message || "erro desconhecido"), "err");
-});
-window.addEventListener("unhandledrejection", (e) => {
-  dbg("❌ unhandledrejection: " + (e.reason?.message || String(e.reason)));
-  showAlert("alertLogin", "Erro (Promise): " + (e.reason?.message || String(e.reason)), "err");
-});
-
-/* =========================
-   SUPABASE SDK CHECK
-========================= */
-if(!window.supabase || !window.supabase.createClient){
-  showAlert("alertLogin", "❌ Supabase SDK não carregou. Verifique o <script> do Supabase no <head>.", "err");
-  dbg("Supabase SDK NÃO carregou.");
-  throw new Error("Supabase SDK not loaded");
-}
-dbg("✅ Supabase SDK carregado.");
-
-/* =========================
-   CLIENT
-========================= */
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: true }
-});
-dbg("✅ Supabase client criado.");
-
-/* =========================
-   UI STATE
-========================= */
-const statusText = document.getElementById("statusText");
-const apiText = document.getElementById("apiText");
-apiText.textContent = API_BASE.replace(/^https?:\/\//, "");
-
-function setUI(session){
-  const loginPanel = document.getElementById("loginPanel");
-  const appPanel = document.getElementById("appPanel");
-  const btnLogout = document.getElementById("btnLogout");
-
-  if(session?.user){
-    statusText.textContent = "Logado: " + (session.user.email || session.user.id);
-    btnLogout.disabled = false;
-    loginPanel.classList.add("hidden");
-    appPanel.classList.remove("hidden");
-    renderSession(session);
-  }else{
-    statusText.textContent = "Deslogado";
-    btnLogout.disabled = true;
-    appPanel.classList.add("hidden");
-    loginPanel.classList.remove("hidden");
-  }
-}
-
-function renderSession(session){
-  const box = document.getElementById("sessionBox");
-  const token = session.access_token || "";
-  box.innerHTML = `
-    <div class="k">Usuário</div><div class="v">${escapeHtml(session.user.email || session.user.id)}</div>
-    <div class="k">Expires (s)</div><div class="v">${escapeHtml(String(session.expires_in || ""))}</div>
-    <div class="k">Token (início)</div><div class="v mono">${escapeHtml(token.slice(0, 30) + "…")}</div>
-  `;
-  dbg("✅ UI atualizada: sessão ativa.");
-}
-
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, s => ({
     "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
   }[s]));
 }
+function slugify(str){
+  return String(str || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+function fmtPreco(v){
+  const n = Number(v || 0);
+  return n.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+}
+function boolVal(v){ return String(v) === "true"; }
 
 /* =========================
-   AUTH ACTIONS
+   Supabase
 ========================= */
-async function loginEmail(){
-  hideAlert("alertLogin");
+if(!window.supabase?.createClient) {
+  alert("Supabase SDK não carregou.");
+  throw new Error("Supabase SDK not loaded");
+}
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true }
+});
+document.getElementById("apiText").textContent = API_BASE.replace(/^https?:\/\//, "");
 
-  const email = (document.getElementById("email").value || "").trim();
-  const password = document.getElementById("password").value || "";
-  dbg("➡️ Clique: loginEmail");
+/* =========================
+   State
+========================= */
+let session = null;
+let clientes = [];
+let categorias = [];
+let produtos = [];
 
-  if(!email || !password){
-    showAlert("alertLogin", "Preencha email e senha.", "err");
-    dbg("⚠️ Campos vazios.");
+let editClienteId = null;
+let editCategoriaId = null;
+let editProdutoId = null;
+
+const statusText = document.getElementById("statusText");
+
+/* =========================
+   Auth helpers
+========================= */
+async function getToken(){
+  const { data } = await sb.auth.getSession();
+  return data?.session?.access_token || "";
+}
+async function authHeaders(){
+  const token = await getToken();
+  if(!token) throw new Error("Sem token. Faça login novamente.");
+  return { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
+}
+
+/* =========================
+   API helpers
+========================= */
+async function apiGet(path){
+  const headers = await authHeaders();
+  const url = API_BASE + path;
+  dbg("GET " + url);
+  const res = await fetch(url, { headers });
+  const txt = await res.text();
+  let json = null;
+  try{ json = JSON.parse(txt); } catch {}
+  if(!res.ok){
+    throw new Error((json?.error || txt || "Erro API") + ` (HTTP ${res.status})`);
+  }
+  return json ?? {};
+}
+async function apiSend(method, path, body){
+  const headers = await authHeaders();
+  const url = API_BASE + path;
+  dbg(method + " " + url);
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const txt = await res.text();
+  let json = null;
+  try{ json = JSON.parse(txt); } catch {}
+  if(!res.ok){
+    throw new Error((json?.error || txt || "Erro API") + ` (HTTP ${res.status})`);
+  }
+  return json ?? {};
+}
+
+/* =========================
+   UI: Tabs
+========================= */
+function setTab(tab){
+  document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+  document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add("active");
+
+  ["clientes","categorias","produtos"].forEach(t => {
+    document.getElementById("tab-" + t).classList.toggle("hidden", t !== tab);
+  });
+}
+
+/* =========================
+   Load all
+========================= */
+async function loadAll(){
+  hideAlert("alertApp");
+  try{
+    const [cli, cat, pro] = await Promise.all([
+      apiGet("/api/admin/clientes"),
+      apiGet("/api/admin/categorias"),
+      apiGet("/api/admin/produtos"),
+    ]);
+
+    clientes   = Array.isArray(cli.data) ? cli.data : (cli.clientes || []);
+    categorias = Array.isArray(cat.data) ? cat.data : (cat.categorias || []);
+    produtos   = Array.isArray(pro.data) ? pro.data : (pro.produtos || []);
+
+    document.getElementById("countClientes").textContent = clientes.length;
+    document.getElementById("countCategorias").textContent = categorias.length;
+    document.getElementById("countProdutos").textContent = produtos.length;
+
+    fillClienteSelects();
+    fillCategoriaSelect();
+
+    renderClientes();
+    renderCategorias();
+    renderProdutos();
+
+    dbg("✅ Dados carregados.");
+  }catch(e){
+    dbg("❌ loadAll: " + (e?.message || e));
+    showAlert("alertApp", e?.message || "Erro ao carregar dados.", "err");
+  }
+}
+
+/* =========================
+   Fill selects
+========================= */
+function fillClienteSelects(){
+  const catSel = document.getElementById("cat_cliente");
+  const proSel = document.getElementById("pro_cliente");
+
+  const opts = clientes
+    .slice()
+    .sort((a,b)=>String(a.nome||"").localeCompare(String(b.nome||"")))
+    .map(c => `<option value="${escapeHtml(c.slug)}">${escapeHtml(c.nome)} (${escapeHtml(c.slug)})</option>`)
+    .join("");
+
+  catSel.innerHTML = opts || `<option value="">— Sem clientes —</option>`;
+  proSel.innerHTML = opts || `<option value="">— Sem clientes —</option>`;
+
+  // ao mudar cliente em produto, refaz categorias
+  proSel.onchange = () => fillCategoriaSelect();
+}
+
+function fillCategoriaSelect(){
+  const cliSlug = document.getElementById("pro_cliente").value;
+  const proCat = document.getElementById("pro_categoria");
+
+  const list = categorias
+    .filter(c => c.cliente_slug === cliSlug)
+    .slice()
+    .sort((a,b)=>Number(a.ordem||0)-Number(b.ordem||0));
+
+  proCat.innerHTML = list.map(c => `<option value="${c.id}">${escapeHtml(c.nome)} (ordem ${escapeHtml(c.ordem)})</option>`).join("")
+    || `<option value="">— Sem categorias para esse cliente —</option>`;
+}
+
+/* =========================
+   CLIENTES: Render
+========================= */
+function renderClientes(){
+  const q = (document.getElementById("cli_busca").value || "").toLowerCase().trim();
+  const tbody = document.getElementById("cli_tbody");
+
+  const base = clientes.slice().filter(c => {
+    if(!q) return true;
+    return String(c.nome||"").toLowerCase().includes(q) || String(c.slug||"").toLowerCase().includes(q);
+  });
+
+  if(base.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" class="muted">Nenhum cliente encontrado.</td></tr>`;
     return;
   }
 
+  tbody.innerHTML = base.map(c => {
+    const ativo = !!c.ativo;
+    const link = `${location.origin}${location.pathname.replace(/\/admin\/.*$/, "/")}index.html?u=${encodeURIComponent(c.slug)}`;
+    return `
+      <tr>
+        <td>${escapeHtml(c.nome || "")}</td>
+        <td class="mono">${escapeHtml(c.slug || "")}</td>
+        <td class="mono">${escapeHtml(c.whatsapp || "")}</td>
+        <td>${ativo ? `<span class="chip on">Ativo</span>` : `<span class="chip off">Inativo</span>`}</td>
+        <td>
+          <div class="actions">
+            <button class="btn" data-act="view" data-slug="${escapeHtml(c.slug)}" type="button">👁️ Ver</button>
+            <button class="btn" data-act="copy" data-link="${escapeHtml(link)}" type="button">🔗 Copiar link</button>
+            <button class="btn" data-act="edit" data-id="${c.id}" type="button">✏️ Editar</button>
+            <button class="btn" data-act="dup" data-id="${c.id}" type="button">📄 Duplicar</button>
+            <button class="btn warn" data-act="toggle" data-id="${c.id}" type="button">${ativo ? "⛔ Desativar" : "✅ Ativar"}</button>
+            <button class="btn danger" data-act="del" data-id="${c.id}" type="button">🗑️ Excluir</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  // bind actions
+  tbody.querySelectorAll("button[data-act]").forEach(btn => {
+    btn.addEventListener("click", () => onClienteAction(btn));
+  });
+}
+
+async function onClienteAction(btn){
+  const act = btn.dataset.act;
+  const id = btn.dataset.id;
+
+  try{
+    if(act === "view"){
+      const slug = btn.dataset.slug;
+      const base = location.origin + location.pathname.replace(/\/admin\/.*$/, "/");
+      window.open(base + `index.html?u=${encodeURIComponent(slug)}`, "_blank");
+      return;
+    }
+
+    if(act === "copy"){
+      await navigator.clipboard.writeText(btn.dataset.link);
+      showAlert("alertApp", "Link copiado ✅", "ok");
+      return;
+    }
+
+    const item = clientes.find(x => String(x.id) === String(id));
+    if(!item && act !== "copy" && act !== "view") throw new Error("Cliente não encontrado.");
+
+    if(act === "edit"){
+      editClienteId = item.id;
+      document.getElementById("cli_nome").value = item.nome || "";
+      document.getElementById("cli_slug").value = item.slug || "";
+      document.getElementById("cli_whats").value = item.whatsapp || "";
+      document.getElementById("cli_ativo").value = String(!!item.ativo);
+      updateCliLinkPreview();
+      showAlert("alertApp", "Modo edição: cliente selecionado.", "ok");
+      return;
+    }
+
+    if(act === "dup"){
+      const novo = {
+        nome: (item.nome || "Cliente") + " (cópia)",
+        slug: slugify((item.slug || "cliente") + "-copia"),
+        whatsapp: item.whatsapp || "",
+        ativo: !!item.ativo
+      };
+      await apiSend("POST", "/api/admin/clientes", novo);
+      showAlert("alertApp", "Cliente duplicado ✅", "ok");
+      await loadAll();
+      return;
+    }
+
+    if(act === "toggle"){
+      await apiSend("PATCH", `/api/admin/clientes?id=${encodeURIComponent(item.id)}`, { ativo: !item.ativo });
+      showAlert("alertApp", "Status atualizado ✅", "ok");
+      await loadAll();
+      return;
+    }
+
+    if(act === "del"){
+      if(!confirm("Tem certeza que deseja excluir este cliente? Isso não apaga automaticamente categorias/produtos relacionados.")) return;
+      await apiSend("DELETE", `/api/admin/clientes?id=${encodeURIComponent(item.id)}`);
+      showAlert("alertApp", "Cliente excluído ✅", "ok");
+      await loadAll();
+      return;
+    }
+  }catch(e){
+    showAlert("alertApp", e?.message || "Erro na ação.", "err");
+  }
+}
+
+/* =========================
+   CLIENTES: Form
+========================= */
+function updateCliLinkPreview(){
+  const slug = (document.getElementById("cli_slug").value || "").trim();
+  const base = location.origin + location.pathname.replace(/\/admin\/.*$/, "/");
+  document.getElementById("cli_link").textContent = slug ? (base + `index.html?u=${slug}`) : "—";
+}
+document.getElementById("cli_slug").addEventListener("input", updateCliLinkPreview);
+document.getElementById("cli_nome").addEventListener("input", () => {
+  if(editClienteId) return;
+  const nome = document.getElementById("cli_nome").value;
+  document.getElementById("cli_slug").value = slugify(nome);
+  updateCliLinkPreview();
+});
+
+async function saveCliente(){
+  hideAlert("alertApp");
+  const btn = document.getElementById("btnCliSalvar");
+  setLoading(btn, "Salvando...", true);
+  try{
+    const nome = document.getElementById("cli_nome").value.trim();
+    const slug = slugify(document.getElementById("cli_slug").value.trim());
+    const whatsapp = (document.getElementById("cli_whats").value || "").replace(/\D/g,"");
+    const ativo = boolVal(document.getElementById("cli_ativo").value);
+
+    if(!nome) throw new Error("Informe o nome do negócio.");
+    if(!slug) throw new Error("Informe um slug válido.");
+
+    const payload = { nome, slug, whatsapp, ativo };
+
+    if(editClienteId){
+      await apiSend("PATCH", `/api/admin/clientes?id=${encodeURIComponent(editClienteId)}`, payload);
+      showAlert("alertApp", "Cliente atualizado ✅", "ok");
+    }else{
+      await apiSend("POST", "/api/admin/clientes", payload);
+      showAlert("alertApp", "Cliente criado ✅", "ok");
+    }
+
+    clearClienteForm();
+    await loadAll();
+  }catch(e){
+    showAlert("alertApp", e?.message || "Erro ao salvar cliente.", "err");
+  }finally{
+    setLoading(btn, "Salvando...", false);
+  }
+}
+function clearClienteForm(){
+  editClienteId = null;
+  document.getElementById("cli_nome").value = "";
+  document.getElementById("cli_slug").value = "";
+  document.getElementById("cli_whats").value = "";
+  document.getElementById("cli_ativo").value = "true";
+  updateCliLinkPreview();
+}
+
+/* =========================
+   CATEGORIAS: Render
+========================= */
+function renderCategorias(){
+  const q = (document.getElementById("cat_busca").value || "").toLowerCase().trim();
+  const tbody = document.getElementById("cat_tbody");
+
+  const byClientName = (slug) => clientes.find(c=>c.slug===slug)?.nome || slug;
+
+  const base = categorias.slice().filter(c => {
+    if(!q) return true;
+    return String(c.nome||"").toLowerCase().includes(q);
+  }).sort((a,b)=>{
+    const an = byClientName(a.cliente_slug).localeCompare(byClientName(b.cliente_slug));
+    if(an !== 0) return an;
+    return Number(a.ordem||0) - Number(b.ordem||0);
+  });
+
+  if(base.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" class="muted">Nenhuma categoria encontrada.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = base.map(c => {
+    const ativo = !!c.ativo;
+    return `
+      <tr>
+        <td>${escapeHtml(byClientName(c.cliente_slug))} <span class="mono muted">(${escapeHtml(c.cliente_slug)})</span></td>
+        <td>${escapeHtml(c.nome||"")}</td>
+        <td class="mono">${escapeHtml(c.ordem ?? "")}</td>
+        <td>${ativo ? `<span class="chip on">Ativa</span>` : `<span class="chip off">Inativa</span>`}</td>
+        <td>
+          <div class="actions">
+            <button class="btn" data-act="edit" data-id="${c.id}" type="button">✏️ Editar</button>
+            <button class="btn" data-act="dup" data-id="${c.id}" type="button">📄 Duplicar</button>
+            <button class="btn warn" data-act="toggle" data-id="${c.id}" type="button">${ativo ? "⛔ Desativar" : "✅ Ativar"}</button>
+            <button class="btn danger" data-act="del" data-id="${c.id}" type="button">🗑️ Excluir</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  tbody.querySelectorAll("button[data-act]").forEach(btn => {
+    btn.addEventListener("click", () => onCategoriaAction(btn));
+  });
+}
+
+async function onCategoriaAction(btn){
+  const act = btn.dataset.act;
+  const id = btn.dataset.id;
+
+  try{
+    const item = categorias.find(x => String(x.id) === String(id));
+    if(!item) throw new Error("Categoria não encontrada.");
+
+    if(act === "edit"){
+      editCategoriaId = item.id;
+      document.getElementById("cat_cliente").value = item.cliente_slug;
+      document.getElementById("cat_nome").value = item.nome || "";
+      document.getElementById("cat_ordem").value = item.ordem ?? "";
+      document.getElementById("cat_ativo").value = String(!!item.ativo);
+      showAlert("alertApp", "Modo edição: categoria selecionada.", "ok");
+      return;
+    }
+
+    if(act === "dup"){
+      const novo = {
+        cliente_slug: item.cliente_slug,
+        nome: (item.nome || "Categoria") + " (cópia)",
+        ordem: Number(item.ordem || 0) + 1,
+        ativo: !!item.ativo
+      };
+      await apiSend("POST", "/api/admin/categorias", novo);
+      showAlert("alertApp", "Categoria duplicada ✅", "ok");
+      await loadAll();
+      return;
+    }
+
+    if(act === "toggle"){
+      await apiSend("PATCH", `/api/admin/categorias?id=${encodeURIComponent(item.id)}`, { ativo: !item.ativo });
+      showAlert("alertApp", "Status atualizado ✅", "ok");
+      await loadAll();
+      return;
+    }
+
+    if(act === "del"){
+      if(!confirm("Excluir categoria? Produtos desta categoria podem ficar sem categoria_id.")) return;
+      await apiSend("DELETE", `/api/admin/categorias?id=${encodeURIComponent(item.id)}`);
+      showAlert("alertApp", "Categoria excluída ✅", "ok");
+      await loadAll();
+      return;
+    }
+  }catch(e){
+    showAlert("alertApp", e?.message || "Erro na ação.", "err");
+  }
+}
+
+/* =========================
+   CATEGORIAS: Form
+========================= */
+async function saveCategoria(){
+  hideAlert("alertApp");
+  const btn = document.getElementById("btnCatSalvar");
+  setLoading(btn, "Salvando...", true);
+  try{
+    const cliente_slug = document.getElementById("cat_cliente").value;
+    const nome = document.getElementById("cat_nome").value.trim();
+    const ordem = Number(document.getElementById("cat_ordem").value || 0);
+    const ativo = boolVal(document.getElementById("cat_ativo").value);
+
+    if(!cliente_slug) throw new Error("Selecione um cliente.");
+    if(!nome) throw new Error("Informe o nome da categoria.");
+
+    const payload = { cliente_slug, nome, ordem, ativo };
+
+    if(editCategoriaId){
+      await apiSend("PATCH", `/api/admin/categorias?id=${encodeURIComponent(editCategoriaId)}`, payload);
+      showAlert("alertApp", "Categoria atualizada ✅", "ok");
+    }else{
+      await apiSend("POST", "/api/admin/categorias", payload);
+      showAlert("alertApp", "Categoria criada ✅", "ok");
+    }
+
+    clearCategoriaForm();
+    await loadAll();
+  }catch(e){
+    showAlert("alertApp", e?.message || "Erro ao salvar categoria.", "err");
+  }finally{
+    setLoading(btn, "Salvando...", false);
+  }
+}
+function clearCategoriaForm(){
+  editCategoriaId = null;
+  document.getElementById("cat_nome").value = "";
+  document.getElementById("cat_ordem").value = "";
+  document.getElementById("cat_ativo").value = "true";
+}
+
+/* =========================
+   PRODUTOS: Render
+========================= */
+function renderProdutos(){
+  const q = (document.getElementById("pro_busca").value || "").toLowerCase().trim();
+  const tbody = document.getElementById("pro_tbody");
+
+  const byClientName = (slug) => clientes.find(c=>c.slug===slug)?.nome || slug;
+  const byCatName = (id) => categorias.find(c=>String(c.id)===String(id))?.nome || "—";
+
+  const base = produtos.slice().filter(p => {
+    if(!q) return true;
+    return String(p.nome||"").toLowerCase().includes(q);
+  }).sort((a,b)=>{
+    const an = byClientName(a.cliente_slug).localeCompare(byClientName(b.cliente_slug));
+    if(an !== 0) return an;
+    return String(a.nome||"").localeCompare(String(b.nome||""));
+  });
+
+  if(base.length === 0){
+    tbody.innerHTML = `<tr><td colspan="6" class="muted">Nenhum produto encontrado.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = base.map(p => {
+    const ativo = !!p.ativo;
+    return `
+      <tr>
+        <td>${escapeHtml(byClientName(p.cliente_slug))}</td>
+        <td>${escapeHtml(p.nome||"")}</td>
+        <td>${escapeHtml(byCatName(p.categoria_id))}</td>
+        <td class="mono">${escapeHtml(fmtPreco(p.preco))}</td>
+        <td>${ativo ? `<span class="chip on">Ativo</span>` : `<span class="chip off">Inativo</span>`}</td>
+        <td>
+          <div class="actions">
+            <button class="btn" data-act="edit" data-id="${p.id}" type="button">✏️ Editar</button>
+            <button class="btn" data-act="dup" data-id="${p.id}" type="button">📄 Duplicar</button>
+            <button class="btn warn" data-act="toggle" data-id="${p.id}" type="button">${ativo ? "⛔ Desativar" : "✅ Ativar"}</button>
+            <button class="btn danger" data-act="del" data-id="${p.id}" type="button">🗑️ Excluir</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  tbody.querySelectorAll("button[data-act]").forEach(btn => {
+    btn.addEventListener("click", () => onProdutoAction(btn));
+  });
+}
+
+async function onProdutoAction(btn){
+  const act = btn.dataset.act;
+  const id = btn.dataset.id;
+
+  try{
+    const item = produtos.find(x => String(x.id) === String(id));
+    if(!item) throw new Error("Produto não encontrado.");
+
+    if(act === "edit"){
+      editProdutoId = item.id;
+      document.getElementById("pro_cliente").value = item.cliente_slug;
+      fillCategoriaSelect();
+      document.getElementById("pro_categoria").value = String(item.categoria_id);
+      document.getElementById("pro_nome").value = item.nome || "";
+      document.getElementById("pro_desc").value = item.descricao || "";
+      document.getElementById("pro_preco").value = item.preco ?? "";
+      document.getElementById("pro_img").value = item.imagem_url || "";
+      document.getElementById("pro_ativo").value = String(!!item.ativo);
+      showAlert("alertApp", "Modo edição: produto selecionado.", "ok");
+      return;
+    }
+
+    if(act === "dup"){
+      const novo = {
+        cliente_slug: item.cliente_slug,
+        categoria_id: item.categoria_id,
+        nome: (item.nome || "Produto") + " (cópia)",
+        descricao: item.descricao || "",
+        preco: Number(item.preco || 0),
+        imagem_url: item.imagem_url || "",
+        ativo: !!item.ativo
+      };
+      await apiSend("POST", "/api/admin/produtos", novo);
+      showAlert("alertApp", "Produto duplicado ✅", "ok");
+      await loadAll();
+      return;
+    }
+
+    if(act === "toggle"){
+      await apiSend("PATCH", `/api/admin/produtos?id=${encodeURIComponent(item.id)}`, { ativo: !item.ativo });
+      showAlert("alertApp", "Status atualizado ✅", "ok");
+      await loadAll();
+      return;
+    }
+
+    if(act === "del"){
+      if(!confirm("Excluir produto?")) return;
+      await apiSend("DELETE", `/api/admin/produtos?id=${encodeURIComponent(item.id)}`);
+      showAlert("alertApp", "Produto excluído ✅", "ok");
+      await loadAll();
+      return;
+    }
+  }catch(e){
+    showAlert("alertApp", e?.message || "Erro na ação.", "err");
+  }
+}
+
+/* =========================
+   PRODUTOS: Form
+========================= */
+async function saveProduto(){
+  hideAlert("alertApp");
+  const btn = document.getElementById("btnProSalvar");
+  setLoading(btn, "Salvando...", true);
+  try{
+    const cliente_slug = document.getElementById("pro_cliente").value;
+    const categoria_id = Number(document.getElementById("pro_categoria").value || 0);
+    const nome = document.getElementById("pro_nome").value.trim();
+    const descricao = document.getElementById("pro_desc").value.trim();
+    const preco = Number(String(document.getElementById("pro_preco").value || "").replace(",", "."));
+    const imagem_url = document.getElementById("pro_img").value.trim();
+    const ativo = boolVal(document.getElementById("pro_ativo").value);
+
+    if(!cliente_slug) throw new Error("Selecione um cliente.");
+    if(!categoria_id) throw new Error("Selecione uma categoria.");
+    if(!nome) throw new Error("Informe o nome do produto.");
+    if(Number.isNaN(preco)) throw new Error("Preço inválido.");
+
+    const payload = { cliente_slug, categoria_id, nome, descricao, preco, imagem_url, ativo };
+
+    if(editProdutoId){
+      await apiSend("PATCH", `/api/admin/produtos?id=${encodeURIComponent(editProdutoId)}`, payload);
+      showAlert("alertApp", "Produto atualizado ✅", "ok");
+    }else{
+      await apiSend("POST", "/api/admin/produtos", payload);
+      showAlert("alertApp", "Produto criado ✅", "ok");
+    }
+
+    clearProdutoForm();
+    await loadAll();
+  }catch(e){
+    showAlert("alertApp", e?.message || "Erro ao salvar produto.", "err");
+  }finally{
+    setLoading(btn, "Salvando...", false);
+  }
+}
+function clearProdutoForm(){
+  editProdutoId = null;
+  document.getElementById("pro_nome").value = "";
+  document.getElementById("pro_desc").value = "";
+  document.getElementById("pro_preco").value = "";
+  document.getElementById("pro_img").value = "";
+  document.getElementById("pro_ativo").value = "true";
+}
+
+/* =========================
+   Auth actions
+========================= */
+async function loginEmail(){
+  hideAlert("alertLogin");
   const btn = document.getElementById("btnLogin");
   setLoading(btn, "Entrando...", true);
 
   try{
+    const email = (document.getElementById("email").value || "").trim();
+    const password = (document.getElementById("password").value || "");
+    if(!email || !password) throw new Error("Preencha email e senha.");
+
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if(error) throw error;
-    dbg("✅ signInWithPassword OK.");
-    setUI(data.session);
+
+    session = data.session;
+    setUI(session);
   }catch(e){
-    dbg("❌ signInWithPassword erro: " + (e?.message || "erro"));
     showAlert("alertLogin", e?.message || "Erro ao logar.", "err");
   }finally{
     setLoading(btn, "Entrando...", false);
@@ -379,114 +1208,114 @@ async function loginEmail(){
 
 async function loginGoogle(){
   hideAlert("alertLogin");
-  dbg("➡️ Clique: loginGoogle");
-
   const btn = document.getElementById("btnGoogle");
   setLoading(btn, "Abrindo Google...", true);
 
   try{
-    // ✅ volta para /admin/ exatamente
-    const redirectTo = window.location.origin + window.location.pathname;
-    dbg("↪️ redirectTo: " + redirectTo);
-
-    const { data, error } = await sb.auth.signInWithOAuth({
+    const redirectTo = window.location.origin + window.location.pathname; // /admin/
+    const { error } = await sb.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo }
     });
     if(error) throw error;
-
-    dbg("✅ signInWithOAuth disparado (deve redirecionar).");
+    // normalmente redireciona imediatamente
   }catch(e){
-    dbg("❌ signInWithOAuth erro: " + (e?.message || "erro"));
-    showAlert("alertLogin", e?.message || "Erro ao abrir login Google.", "err");
+    showAlert("alertLogin", e?.message || "Erro ao abrir Google.", "err");
     setLoading(btn, "Abrindo Google...", false);
   }
 }
 
 async function logout(){
-  dbg("➡️ Clique: logout");
   await sb.auth.signOut();
+  session = null;
   setUI(null);
-}
-
-/* =========================
-   API TEST (opcional)
-========================= */
-async function getToken(){
-  const { data } = await sb.auth.getSession();
-  return data?.session?.access_token || "";
-}
-
-async function pingApi(){
-  hideAlert("alertApi");
-  dbg("➡️ Clique: pingApi");
-
-  try{
-    const token = await getToken();
-    if(!token){
-      showAlert("alertApi", "Sem token. Faça login primeiro.", "err");
-      return;
-    }
-
-    // ajuste para seu endpoint real (se existir)
-    const url = API_BASE + "/api/ping";
-    dbg("↪️ GET " + url);
-
-    const res = await fetch(url, {
-      method: "GET",
-      headers: { "Authorization": "Bearer " + token }
-    });
-
-    const txt = await res.text();
-    dbg("✅ API respondeu: " + res.status);
-    showAlert("alertApi", "Status: " + res.status + "\nResposta: " + txt, res.ok ? "ok" : "err");
-  }catch(e){
-    dbg("❌ pingApi erro: " + (e?.message || "erro"));
-    showAlert("alertApi", e?.message || "Erro ao chamar API.", "err");
-  }
 }
 
 async function copyToken(){
   const token = await getToken();
-  if(!token){
-    showAlert("alertApi", "Sem token. Faça login primeiro.", "err");
-    return;
-  }
+  if(!token) return showAlert("alertApp", "Sem token.", "err");
   await navigator.clipboard.writeText(token);
-  showAlert("alertApi", "Token copiado ✅", "ok");
-  dbg("✅ Token copiado.");
+  showAlert("alertApp", "Token copiado ✅", "ok");
 }
 
 /* =========================
-   BIND EVENTS
+   UI switch
+========================= */
+function setUI(sess){
+  const loginPanel = document.getElementById("loginPanel");
+  const appPanel = document.getElementById("appPanel");
+  const btnLogout = document.getElementById("btnLogout");
+
+  if(sess?.user){
+    statusText.textContent = "Logado: " + (sess.user.email || sess.user.id);
+    btnLogout.disabled = false;
+    loginPanel.classList.add("hidden");
+    appPanel.classList.remove("hidden");
+    loadAll();
+  }else{
+    statusText.textContent = "Deslogado";
+    btnLogout.disabled = true;
+    appPanel.classList.add("hidden");
+    loginPanel.classList.remove("hidden");
+  }
+}
+
+/* =========================
+   Bind events
 ========================= */
 document.addEventListener("DOMContentLoaded", async () => {
-  dbg("✅ DOMContentLoaded");
+  dbg("Init...");
 
+  // tabs
+  document.querySelectorAll(".tab").forEach(t => {
+    t.addEventListener("click", () => setTab(t.dataset.tab));
+  });
+
+  // login
   document.getElementById("btnLogin").addEventListener("click", loginEmail);
   document.getElementById("btnGoogle").addEventListener("click", loginGoogle);
   document.getElementById("btnLogout").addEventListener("click", logout);
-  document.getElementById("btnPingApi").addEventListener("click", pingApi);
-  document.getElementById("btnCopyToken").addEventListener("click", copyToken);
-
-  // Enter no campo senha
   document.getElementById("password").addEventListener("keydown", (e) => {
     if(e.key === "Enter") loginEmail();
   });
 
-  // sessão atual
-  const { data } = await sb.auth.getSession();
-  setUI(data.session);
+  // refresh
+  document.getElementById("btnRefreshAll").addEventListener("click", loadAll);
+  document.getElementById("btnCopyToken").addEventListener("click", copyToken);
 
-  // mudanças (quando volta do Google)
-  sb.auth.onAuthStateChange((event, session) => {
-    dbg("🔔 AuthStateChange: " + event);
-    setUI(session);
-    setLoading(document.getElementById("btnGoogle"), "Abrindo Google...", false);
+  // clientes
+  document.getElementById("btnCliSalvar").addEventListener("click", saveCliente);
+  document.getElementById("btnCliLimpar").addEventListener("click", clearClienteForm);
+  document.getElementById("btnCliRecarregar").addEventListener("click", loadAll);
+  document.getElementById("cli_busca").addEventListener("input", renderClientes);
+
+  // categorias
+  document.getElementById("btnCatSalvar").addEventListener("click", saveCategoria);
+  document.getElementById("btnCatLimpar").addEventListener("click", clearCategoriaForm);
+  document.getElementById("btnCatRecarregar").addEventListener("click", loadAll);
+  document.getElementById("cat_busca").addEventListener("input", renderCategorias);
+
+  // produtos
+  document.getElementById("btnProSalvar").addEventListener("click", saveProduto);
+  document.getElementById("btnProLimpar").addEventListener("click", clearProdutoForm);
+  document.getElementById("btnProRecarregar").addEventListener("click", loadAll);
+  document.getElementById("pro_busca").addEventListener("input", renderProdutos);
+
+  // session init
+  const { data } = await sb.auth.getSession();
+  session = data.session;
+  setUI(session);
+
+  // capture auth changes (google return)
+  sb.auth.onAuthStateChange((event, sess) => {
+    dbg("AuthStateChange: " + event);
+    session = sess;
+    setUI(sess);
   });
 
-  dbg("✅ Init completo.");
+  dbg("Ready.");
 });
 </script>
+
 </body>
 </html>
