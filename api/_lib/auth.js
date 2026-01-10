@@ -29,8 +29,10 @@ export async function requireAdmin(req) {
     const email = (data.user.email || "").toLowerCase();
     const allowed = parseAdminEmails();
 
-    if (!email || !allowed.includes(email)) {
-      return { ok: false, status: 403, error: "Not an admin" };
+    if (allowed.length > 0) {
+      if (!email || !allowed.includes(email)) {
+        return { ok: false, status: 403, error: "Not an admin" };
+      }
     }
 
     return { ok: true, status: 200, user: data.user };
