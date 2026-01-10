@@ -1,151 +1,74 @@
-// api/admin/produtos.js
-import { requireAdmin } from "../_lib/auth.js";
-import { supabaseAdmin } from "../_lib/supabaseAdmin.js";
+import { createClient } from "@supabase/supabase-js";
+import { requireAdmin, setCors, json, readBody } from "../_lib/auth.js";
 
-const ALLOWED_ORIGINS = [
-  "https://playmomentsstudios-commits.github.io",
-  "http://localhost:3000",
-  "http://localhost:5173",
-];
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-function setCors(req, res) {
-  const origin = req.headers.origin || "";
-  const isVercel = origin.endsWith(".vercel.app");
-  const isAllowed = ALLOWED_ORIGINS.includes(origin) || isVercel;
-
-  res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "authorization, content-type, x-requested-with"
-  );
-
-  if (isAllowed) res.setHeader("Access-Control-Allow-Origin", origin);
-}
-
-function json(res, status, body) {
-  res.statusCode = status;
-  res.setHeader("Content-Type", "application/json; charset=utf-8");
-  res.end(JSON.stringify(body));
-}
-
-async function readBody(req) {
-  if (req.method === "GET" || req.method === "DELETE") return {};
-  return new Promise((resolve) => {
-    let data = "";
-    req.on("data", (c) => (data += c));
-    req.on("end", () => {
-      if (!data) return resolve({});
-      try {
-        resolve(JSON.parse(data));
-      } catch {
-        resolve({ __invalidJson: true });
-      }
-    });
-  });
-}
-
-function getQuery(req) {
-  const url = new URL(req.url, `https://${req.headers.host}`);
-  return Object.fromEntries(url.searchParams.entries());
-}
+const sbAdmin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 export default async function handler(req, res) {
   setCors(req, res);
+  if (req.method === "OPTIONS") return res.status(204).end();
 
-  if (req.method === "OPTIONS") {
-    res.statusCode = 204;
-    return res.end();
+  if (!SUPABASE_URL || !SERVICE_ROLE) {
+    return json(res, 500, { error: "Missing SUPABASE_URL or SERVICE_ROLE env" });
   }
 
   const auth = await requireAdmin(req);
   if (!auth.ok) return json(res, auth.status, { error: auth.error });
 
-  const sb = supabaseAdmin();
-  const q = getQuery(req);
-  const body = await readBody(req);
-  if (body.__invalidJson) return json(res, 400, { error: "Invalid JSON body" });
-
   try {
-    // ===== LISTAR =====
+    // LISTAR
     if (req.method === "GET") {
-      const cliente_slug = (q.cliente_slug || "").trim();
-      const categoria_id = (q.categoria_id || "").trim();
+      const { data, error } = await sbAdmin
+        .from("produtos")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      let query = sb.from("produtos").select("*").order("created_at", { ascending: false });
-
-      if (cliente_slug) query = query.eq("cliente_slug", cliente_slug);
-      if (categoria_id) query = query.eq("categoria_id", categoria_id);
-
-      const { data, error } = await query;
       if (error) return json(res, 400, { error: error.message });
-
       return json(res, 200, { data });
     }
 
-    // ===== CRIAR =====
+    const body = await readBody(req);
+
+    // CRIAR
     if (req.method === "POST") {
-      const {
-        cliente_slug,
-        categoria_id,
-        nome,
-        descricao = "",
-        preco = 0,
-        imagem_url = "",
-        ativo = true,
-      } = body;
-
-      if (!cliente_slug || !categoria_id || !nome) {
-        return json(res, 400, {
-          error: "Campos obrigatórios: cliente_slug, categoria_id, nome",
-        });
-      }
-
       const payload = {
-        cliente_slug: String(cliente_slug).trim(),
-        categoria_id,
-        nome: String(nome).trim(),
-        descricao: String(descricao || "").trim(),
-        preco: Number(preco) || 0,
-        imagem_url: String(imagem_url || "").trim(),
-        ativo: Boolean(ativo),
+        cliente_slug: body.cliente_slug,
+        categoria_id: body.categoria_id,
+        nome: body.nome,
+        descricao: body.descricao || null,
+        preco: Number(body.preco || 0),
+        imagem_url: body.imagem_url || null,
+        ativo: body.ativo !== false,
       };
 
-      const { data, error } = await sb
+      const { data, error } = await sbAdmin
         .from("produtos")
         .insert(payload)
         .select("*")
         .single();
 
       if (error) return json(res, 400, { error: error.message });
-      return json(res, 201, { data });
+      return json(res, 200, { data });
     }
 
-    // ===== ATUALIZAR =====
-    if (req.method === "PATCH") {
-      const {
-        id,
-        cliente_slug,
-        categoria_id,
-        nome,
-        descricao,
-        preco,
-        imagem_url,
-        ativo,
-      } = body;
-
-      if (!id) return json(res, 400, { error: "id é obrigatório para atualizar" });
+    // ATUALIZAR
+    if (req.method === "PATCH" || req.method === "PUT") {
+      const id = body.id;
+      if (!id) return json(res, 400, { error: "id obrigatório" });
 
       const patch = {};
-      if (cliente_slug !== undefined) patch.cliente_slug = String(cliente_slug).trim();
-      if (categoria_id !== undefined) patch.categoria_id = categoria_id;
-      if (nome !== undefined) patch.nome = String(nome).trim();
-      if (descricao !== undefined) patch.descricao = String(descricao || "").trim();
-      if (preco !== undefined) patch.preco = Number(preco) || 0;
-      if (imagem_url !== undefined) patch.imagem_url = String(imagem_url || "").trim();
-      if (ativo !== undefined) patch.ativo = Boolean(ativo);
+      if (body.nome != null) patch.nome = body.nome;
+      if (body.descricao != null) patch.descricao = body.descricao || null;
+      if (body.preco != null) patch.preco = Number(body.preco || 0);
+      if (body.imagem_url != null) patch.imagem_url = body.imagem_url || null;
+      if (body.categoria_id != null) patch.categoria_id = body.categoria_id;
+      if (body.ativo != null) patch.ativo = !!body.ativo;
 
-      const { data, error } = await sb
+      const { data, error } = await sbAdmin
         .from("produtos")
         .update(patch)
         .eq("id", id)
@@ -156,12 +79,12 @@ export default async function handler(req, res) {
       return json(res, 200, { data });
     }
 
-    // ===== EXCLUIR =====
+    // EXCLUIR
     if (req.method === "DELETE") {
-      const { id } = q;
-      if (!id) return json(res, 400, { error: "Passe ?id= no querystring" });
+      const id = req.query?.id;
+      if (!id) return json(res, 400, { error: "id obrigatório" });
 
-      const { error } = await sb.from("produtos").delete().eq("id", id);
+      const { error } = await sbAdmin.from("produtos").delete().eq("id", id);
       if (error) return json(res, 400, { error: error.message });
 
       return json(res, 200, { ok: true });
@@ -169,6 +92,6 @@ export default async function handler(req, res) {
 
     return json(res, 405, { error: "Method not allowed" });
   } catch (e) {
-    return json(res, 500, { error: e?.message || "Server error" });
+    return json(res, 500, { error: String(e?.message || e) });
   }
 }
