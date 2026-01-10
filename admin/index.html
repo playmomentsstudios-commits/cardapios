@@ -2,40 +2,41 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Painel Alfa — Cardápio Digital</title>
+  <title>Painel Alfa — Cardápio Digital (Novo)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- ✅ Supabase UMD (compatível com GitHub Pages) -->
+  <!-- ✅ Supabase UMD (GitHub Pages friendly) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
     :root{
-      --bg1:#06101b;
-      --bg2:#040a12;
+      --bg1:#071322;
+      --bg2:#040b14;
       --panel:rgba(255,255,255,.07);
-      --stroke:rgba(255,255,255,.10);
+      --stroke:rgba(255,255,255,.12);
       --text:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.70);
-      --danger: rgba(255, 77, 79, .14);
-      --dangerStroke: rgba(255, 77, 79, .35);
-      --ok: rgba(40, 209, 124, .14);
-      --okStroke: rgba(40, 209, 124, .35);
       --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --dangerBG: rgba(255, 77, 79, .14);
+      --dangerStroke: rgba(255, 77, 79, .35);
+      --okBG: rgba(40, 209, 124, .14);
+      --okStroke: rgba(40, 209, 124, .35);
+      --brandA:#2c6cff;
+      --brandB:#00d4ff;
     }
-    *{ box-sizing:border-box }
+    *{box-sizing:border-box}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--text);
-      background:
-        radial-gradient(1200px 600px at 10% 10%, rgba(44,108,255,.25), transparent 60%),
-        radial-gradient(1000px 600px at 90% 20%, rgba(0,212,255,.18), transparent 55%),
-        radial-gradient(900px 600px at 50% 90%, rgba(40,209,124,.12), transparent 60%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
       min-height:100vh;
+      background:
+        radial-gradient(1100px 600px at 10% 10%, rgba(44,108,255,.25), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(0,212,255,.16), transparent 55%),
+        radial-gradient(900px 600px at 50% 90%, rgba(40,209,124,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
     }
-    .wrap{max-width:1100px;margin:0 auto;padding:22px 18px 56px}
-
+    .wrap{max-width:1100px;margin:0 auto;padding:22px 16px 60px}
     .top{
       border-radius:24px;
       background:linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
@@ -43,23 +44,22 @@
       box-shadow:var(--shadow);
       padding:18px;
       backdrop-filter: blur(10px);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
     }
-    .brand{display:flex;gap:14px;align-items:center;min-width:260px;}
+    .brand{display:flex;gap:14px;align-items:center;min-width:260px}
     .logo{
       width:62px;height:62px;border-radius:18px;
       background:linear-gradient(135deg, rgba(44,108,255,.35), rgba(0,212,255,.20));
       border:1px dashed rgba(255,255,255,.35);
-      display:grid;place-items:center;font-weight:900;letter-spacing:.5px;user-select:none;
+      display:grid;place-items:center;
+      font-weight:900;letter-spacing:.4px;
+      user-select:none;
     }
     .top h1{margin:0;font-size:22px;line-height:1.1}
     .top p{margin:6px 0 0;color:var(--muted);font-size:13px}
 
-    .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:1;}
+    .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:1}
     .pill{
       display:flex;gap:8px;align-items:center;
       padding:10px 12px;border-radius:999px;
@@ -69,348 +69,424 @@
     }
     .pill b{color:var(--text)}
     .btn{
-      appearance:none;border:1px solid var(--stroke);
+      appearance:none;
+      border:1px solid var(--stroke);
       background:rgba(255,255,255,.08);
       color:var(--text);
-      padding:10px 14px;border-radius:12px;
-      font-weight:900;font-size:13px;cursor:pointer;
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:900;
+      font-size:13px;
+      cursor:pointer;
       transition:transform .05s ease, background .2s ease;
-      display:inline-flex;align-items:center;gap:8px;user-select:none;
+      display:inline-flex;align-items:center;gap:8px;
+      user-select:none;
     }
     .btn:hover{background:rgba(255,255,255,.12)}
     .btn:active{transform:translateY(1px)}
     .btn.primary{
       background:linear-gradient(135deg, rgba(44,108,255,.95), rgba(0,212,255,.55));
-      border-color:rgba(0,0,0,0);
+      border-color:transparent;
       color:#06101b;
     }
-    .btn.danger{background:rgba(255,77,79,.14);border-color:rgba(255,77,79,.25);}
+    .btn.danger{
+      background:rgba(255,77,79,.14);
+      border-color:rgba(255,77,79,.25);
+    }
     .btn[disabled]{opacity:.55;cursor:not-allowed}
 
     .panel{
-      margin-top:14px;border-radius:24px;
+      margin-top:14px;
+      border-radius:24px;
       background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
       border:1px solid var(--stroke);
       box-shadow:var(--shadow);
-      padding:18px;backdrop-filter: blur(10px);
+      padding:18px;
+      backdrop-filter: blur(10px);
     }
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
     @media (max-width: 880px){ .grid{grid-template-columns:1fr} }
 
     label{display:block;margin-top:10px;font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.2px;}
     input{
-      width:100%;padding:12px 12px;margin-top:6px;border-radius:14px;
+      width:100%;
+      padding:12px 12px;
+      margin-top:6px;
+      border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(6,16,27,.55);
-      color:var(--text);outline:none;
+      color:var(--text);
+      outline:none;
     }
-    input:focus{border-color:rgba(44,108,255,.65);background:rgba(6,16,27,.70);}
-    .rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    input:focus{border-color:rgba(44,108,255,.65);background:rgba(6,16,27,.72);}
 
+    .rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .alert{
-      margin-top:12px;padding:12px 14px;border-radius:16px;
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.06);
       display:none;
       white-space:pre-wrap;
       line-height:1.45;
+      font-size:13px;
     }
     .alert.show{display:block}
-    .alert.err{background:var(--danger);border-color:var(--dangerStroke)}
-    .alert.ok{background:var(--ok);border-color:var(--okStroke)}
+    .alert.err{background:var(--dangerBG);border-color:var(--dangerStroke)}
+    .alert.ok{background:var(--okBG);border-color:var(--okStroke)}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
     .muted{color:var(--muted)}
     .hidden{display:none !important}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
     .small{font-size:12px}
+
+    .kv{display:grid;grid-template-columns:160px 1fr;gap:8px 10px;margin-top:12px}
+    .kv div{padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04)}
+    .kv .k{color:var(--muted);font-weight:900;font-size:12px}
+    .kv .v{font-size:12px;word-break:break-all}
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header class="top">
-      <div class="brand">
-        <div class="logo">LOGO</div>
-        <div>
-          <h1>Painel Alfa — Cardápio Digital</h1>
-          <p class="muted">Super Admin • Login via Supabase Auth (Email/Senha ou Google)</p>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo">LOGO</div>
+      <div>
+        <h1>Painel Alfa — Cardápio Digital</h1>
+        <p class="muted">Admin novo • Supabase Auth (Email/Senha + Google) • Sem travar</p>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="pill"><span class="muted">Status:</span> <b id="statusText">Carregando…</b></div>
+      <div class="pill"><span class="muted">API:</span> <b id="apiText" class="mono">—</b></div>
+      <button class="btn danger" id="btnLogout" type="button" disabled>🚪 Sair</button>
+    </div>
+  </header>
+
+  <!-- LOGIN -->
+  <section class="panel" id="loginPanel">
+    <h2 style="margin:0 0 6px">Login</h2>
+    <div class="muted small">Entre com email/senha (Supabase Auth) ou com Google.</div>
+
+    <div class="grid" style="margin-top:12px">
+      <div>
+        <label>Email</label>
+        <input id="email" type="email" placeholder="seu@email.com" autocomplete="email" />
+
+        <label>Senha</label>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+
+        <div class="rowBtns">
+          <button class="btn primary" id="btnLogin" type="button">🔐 Entrar</button>
+          <button class="btn" id="btnGoogle" type="button">🟦 Entrar com Google</button>
+        </div>
+
+        <div class="alert err" id="alertLogin"></div>
+
+        <div class="muted small" style="margin-top:10px">
+          Se “clicar e não acontecer nada”, veja a caixa <b>Diagnóstico</b> abaixo — ela mostra o erro real.
         </div>
       </div>
 
-      <div class="right">
-        <div class="pill"><span class="muted">Status:</span> <b id="statusText">Deslogado</b></div>
-        <div class="pill"><span class="muted">Projeto:</span> <b class="mono">rgsnmxspyywwouhcdwkj</b></div>
-        <button class="btn danger" id="btnLogout" type="button" disabled>🚪 Sair</button>
-      </div>
-    </header>
-
-    <!-- LOGIN -->
-    <section class="panel" id="loginPanel">
-      <h2 style="margin:0 0 6px">Login</h2>
-      <div class="muted small">Você pode entrar com email/senha (Supabase Auth) ou com Google.</div>
-
-      <div class="grid" style="margin-top:12px">
-        <div>
-          <label>Email</label>
-          <input id="email" type="email" placeholder="seu@email.com" autocomplete="email" />
-
-          <label>Senha</label>
-          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
-
-          <div class="rowBtns">
-            <button class="btn primary" id="btnLogin" type="button">🔐 Entrar</button>
-            <button class="btn" id="btnGoogle" type="button">🟦 Entrar com Google</button>
-          </div>
-
-          <div class="alert err" id="loginAlert"></div>
-
-          <div class="muted small" style="margin-top:10px">
-            Dica: se o Google não voltar logado, confira no Supabase <b>URL Configuration</b> (Site URL e Redirect URLs).
-          </div>
-        </div>
-
-        <div>
-          <div class="muted small" style="line-height:1.55">
-            <b>Checklist rápido:</b><br/>
-            1) Provider Google ativado no Supabase (Client ID/Secret).<br/>
-            2) Callback no Google:<br/>
-            <span class="mono">https://rgsnmxspyywwouhcdwkj.supabase.co/auth/v1/callback</span><br/>
-            3) Redirect URLs no Supabase incluem:<br/>
-            <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/admin/</span><br/>
-            <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/*</span><br/>
-          </div>
+      <div>
+        <div class="muted small" style="line-height:1.6">
+          <b>Checklist:</b><br/>
+          • Provider Google ativado no Supabase (Client ID/Secret).<br/>
+          • Callback no Google:<br/>
+          <span class="mono">https://rgsnmxspyywwouhcdwkj.supabase.co/auth/v1/callback</span><br/>
+          • Redirect URLs no Supabase (Auth → URL Configuration):<br/>
+          <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/admin/</span><br/>
+          <span class="mono">https://playmomentsstudios-commits.github.io/cafeteria/*</span><br/>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- APP -->
-    <section class="panel hidden" id="appPanel">
-      <h2 style="margin:0 0 6px">Você está logado ✅</h2>
-      <div class="muted small">Sessão ativa. Se quiser, daqui você chama sua API na Vercel com Bearer token.</div>
+  <!-- LOGADO -->
+  <section class="panel hidden" id="appPanel">
+    <h2 style="margin:0 0 6px">Logado ✅</h2>
+    <div class="muted small">Sessão capturada com sucesso. Próximo passo é ligar seu CRUD pela API Vercel.</div>
 
-      <div class="alert ok show" id="appAlert" style="margin-top:12px">
-        OK. Login funcionando.
-      </div>
+    <div class="alert ok show" id="alertOk" style="display:block;margin-top:12px">
+      Login funcionando. Se sua API responder “Missing Bearer token”, é porque o front não enviou o token.
+    </div>
 
-      <div class="rowBtns">
-        <a class="btn" href="../" style="text-decoration:none">🏠 Voltar para Home</a>
-      </div>
-    </section>
+    <div class="kv" id="sessionBox"></div>
 
-    <!-- DIAGNÓSTICO -->
-    <section class="panel" id="debugPanel">
-      <h3 style="margin:0 0 6px">Diagnóstico</h3>
-      <div class="muted small">Se algo “não fizer nada”, aqui vai mostrar a última ação e qualquer erro do JS.</div>
-      <div class="alert show" id="debugBox" style="display:block">
-        Carregando…
-      </div>
-    </section>
-  </div>
+    <div class="rowBtns" style="margin-top:14px">
+      <button class="btn" id="btnCopyToken" type="button">📋 Copiar token</button>
+      <button class="btn" id="btnPingApi" type="button">🔌 Testar API (ping)</button>
+      <a class="btn" href="../" style="text-decoration:none">🏠 Voltar para Home</a>
+    </div>
+
+    <div class="alert err" id="alertApi"></div>
+  </section>
+
+  <!-- DIAGNÓSTICO -->
+  <section class="panel" id="debugPanel">
+    <h3 style="margin:0 0 6px">Diagnóstico</h3>
+    <div class="muted small">Aqui aparece cada clique, redirecionamento, sessão e qualquer erro do JS.</div>
+    <div class="alert show" id="debugBox" style="display:block">Iniciando…</div>
+  </section>
+
+</div>
 
 <script>
-/* ======================
-   CONFIG SUPABASE
-====================== */
+/* =========================
+   CONFIG (SEUS DADOS)
+========================= */
 const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
 
-/* ======================
+// ✅ Se você tiver um domínio Vercel para sua API, coloque aqui (opcional)
+const API_BASE = "https://cafeteria-gamma-orpin.vercel.app"; // ajuste se necessário
+
+/* =========================
    DIAGNÓSTICO
-====================== */
-const dbg = (msg) => {
-  const el = document.getElementById("debugBox");
+========================= */
+const dbgEl = () => document.getElementById("debugBox");
+function dbg(msg){
   const now = new Date().toLocaleTimeString("pt-BR");
-  el.textContent = `[${now}] ${msg}\n` + el.textContent.replace(/^Carregando…\n?/, "");
-};
-
-window.addEventListener("error", (e) => {
-  dbg("❌ window.onerror: " + (e.message || "erro") + (e.filename ? ` | ${e.filename}:${e.lineno}` : ""));
-  showAlert("Erro JS: " + (e.message || "erro desconhecido"));
-});
-
-window.addEventListener("unhandledrejection", (e) => {
-  dbg("❌ unhandledrejection: " + (e.reason?.message || String(e.reason)));
-  showAlert("Erro (Promise): " + (e.reason?.message || String(e.reason)));
-});
-
-/* ======================
-   SUPABASE SDK GUARD
-====================== */
-function showAlert(msg, type="err") {
-  const a = document.getElementById("loginAlert");
-  a.textContent = msg;
-  a.className = "alert show " + type;
+  const el = dbgEl();
+  el.textContent = `[${now}] ${msg}\n` + el.textContent.replace(/^Iniciando…\n?/, "");
 }
-function hideAlert() {
-  const a = document.getElementById("loginAlert");
-  a.textContent = "";
-  a.className = "alert err";
-  a.classList.remove("show");
+function showAlert(id, msg, type){
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = "alert show " + (type || "err");
 }
-function setLoading(btn, text, isLoading){
+function hideAlert(id){
+  const el = document.getElementById(id);
+  el.textContent = "";
+  el.className = "alert";
+}
+function setLoading(btn, text, on){
   if(!btn) return;
-  if(isLoading){
+  if(on){
     btn.dataset._txt = btn.textContent;
     btn.textContent = text;
     btn.disabled = true;
-  } else {
+  }else{
     btn.textContent = btn.dataset._txt || btn.textContent;
     btn.disabled = false;
   }
 }
+window.addEventListener("error", (e) => {
+  dbg("❌ window.onerror: " + (e.message || "erro") + (e.filename ? ` | ${e.filename}:${e.lineno}` : ""));
+  showAlert("alertLogin", "Erro JS: " + (e.message || "erro desconhecido"), "err");
+});
+window.addEventListener("unhandledrejection", (e) => {
+  dbg("❌ unhandledrejection: " + (e.reason?.message || String(e.reason)));
+  showAlert("alertLogin", "Erro (Promise): " + (e.reason?.message || String(e.reason)), "err");
+});
 
-if (!window.supabase || !window.supabase.createClient) {
-  showAlert("❌ Supabase SDK não carregou. Verifique o script UMD no <head>.");
-  dbg("Supabase SDK não carregou (window.supabase indefinido).");
+/* =========================
+   SUPABASE SDK CHECK
+========================= */
+if(!window.supabase || !window.supabase.createClient){
+  showAlert("alertLogin", "❌ Supabase SDK não carregou. Verifique o <script> do Supabase no <head>.", "err");
+  dbg("Supabase SDK NÃO carregou.");
   throw new Error("Supabase SDK not loaded");
 }
 dbg("✅ Supabase SDK carregado.");
 
-/* ======================
+/* =========================
    CLIENT
-====================== */
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
-  { auth: { persistSession: true } }
-);
+========================= */
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true }
+});
 dbg("✅ Supabase client criado.");
 
-/* ======================
+/* =========================
    UI STATE
-====================== */
-function onLogged(session){
-  const statusText = document.getElementById("statusText");
-  const btnLogout = document.getElementById("btnLogout");
+========================= */
+const statusText = document.getElementById("statusText");
+const apiText = document.getElementById("apiText");
+apiText.textContent = API_BASE.replace(/^https?:\/\//, "");
+
+function setUI(session){
   const loginPanel = document.getElementById("loginPanel");
   const appPanel = document.getElementById("appPanel");
+  const btnLogout = document.getElementById("btnLogout");
 
   if(session?.user){
-    statusText.textContent = session.user.email || "Logado";
+    statusText.textContent = "Logado: " + (session.user.email || session.user.id);
     btnLogout.disabled = false;
     loginPanel.classList.add("hidden");
     appPanel.classList.remove("hidden");
-    dbg("✅ Sessão ativa: " + (session.user.email || session.user.id));
-  } else {
+    renderSession(session);
+  }else{
     statusText.textContent = "Deslogado";
     btnLogout.disabled = true;
     appPanel.classList.add("hidden");
     loginPanel.classList.remove("hidden");
-    dbg("ℹ️ Sem sessão.");
   }
 }
 
-/* ======================
+function renderSession(session){
+  const box = document.getElementById("sessionBox");
+  const token = session.access_token || "";
+  box.innerHTML = `
+    <div class="k">Usuário</div><div class="v">${escapeHtml(session.user.email || session.user.id)}</div>
+    <div class="k">Expires (s)</div><div class="v">${escapeHtml(String(session.expires_in || ""))}</div>
+    <div class="k">Token (início)</div><div class="v mono">${escapeHtml(token.slice(0, 30) + "…")}</div>
+  `;
+  dbg("✅ UI atualizada: sessão ativa.");
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+  }[s]));
+}
+
+/* =========================
    AUTH ACTIONS
-====================== */
+========================= */
 async function loginEmail(){
-  hideAlert();
-  const btn = document.getElementById("btnLogin");
+  hideAlert("alertLogin");
+
   const email = (document.getElementById("email").value || "").trim();
   const password = document.getElementById("password").value || "";
-
-  dbg("➡️ Clique: Login Email/Senha");
+  dbg("➡️ Clique: loginEmail");
 
   if(!email || !password){
-    showAlert("Preencha email e senha.");
+    showAlert("alertLogin", "Preencha email e senha.", "err");
     dbg("⚠️ Campos vazios.");
     return;
   }
 
+  const btn = document.getElementById("btnLogin");
   setLoading(btn, "Entrando...", true);
 
   try{
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if(error) throw error;
     dbg("✅ signInWithPassword OK.");
-    if (!data.session) {
-      dbg("⚠️ Nenhuma sessão retornada (confirmação de email pendente?).");
-      showAlert("Login recebido, mas sem sessão. Verifique se o email foi confirmado.");
-      return;
-    }
-    onLogged(data.session);
+    setUI(data.session);
   }catch(e){
     dbg("❌ signInWithPassword erro: " + (e?.message || "erro"));
-    showAlert(e?.message || "Erro ao logar");
+    showAlert("alertLogin", e?.message || "Erro ao logar.", "err");
   }finally{
     setLoading(btn, "Entrando...", false);
   }
 }
 
 async function loginGoogle(){
-  hideAlert();
+  hideAlert("alertLogin");
+  dbg("➡️ Clique: loginGoogle");
+
   const btn = document.getElementById("btnGoogle");
-
-  dbg("➡️ Clique: Login Google");
-
   setLoading(btn, "Abrindo Google...", true);
 
   try{
+    // ✅ volta para /admin/ exatamente
     const redirectTo = window.location.origin + window.location.pathname;
     dbg("↪️ redirectTo: " + redirectTo);
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await sb.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo }
     });
-
     if(error) throw error;
 
-    // Importante: normalmente o browser redireciona imediatamente
-    dbg("✅ signInWithOAuth disparado.");
-    if (data?.url) {
-      dbg("➡️ Redirecionando para: " + data.url);
-      window.location.href = data.url;
-    } else {
-      dbg("⚠️ Nenhuma URL retornada para OAuth.");
-      showAlert("Não foi possível obter a URL de login do Google.");
-      setLoading(btn, "Abrindo Google...", false);
-    }
+    dbg("✅ signInWithOAuth disparado (deve redirecionar).");
   }catch(e){
     dbg("❌ signInWithOAuth erro: " + (e?.message || "erro"));
-    showAlert(e?.message || "Erro ao abrir login Google");
+    showAlert("alertLogin", e?.message || "Erro ao abrir login Google.", "err");
     setLoading(btn, "Abrindo Google...", false);
   }
 }
 
 async function logout(){
-  hideAlert();
-  dbg("➡️ Clique: Logout");
-  await supabase.auth.signOut();
-  onLogged(null);
+  dbg("➡️ Clique: logout");
+  await sb.auth.signOut();
+  setUI(null);
 }
 
-/* ======================
-   BIND EVENTS (sem onclick inline)
-====================== */
-const init = async () => {
+/* =========================
+   API TEST (opcional)
+========================= */
+async function getToken(){
+  const { data } = await sb.auth.getSession();
+  return data?.session?.access_token || "";
+}
+
+async function pingApi(){
+  hideAlert("alertApi");
+  dbg("➡️ Clique: pingApi");
+
+  try{
+    const token = await getToken();
+    if(!token){
+      showAlert("alertApi", "Sem token. Faça login primeiro.", "err");
+      return;
+    }
+
+    // ajuste para seu endpoint real (se existir)
+    const url = API_BASE + "/api/ping";
+    dbg("↪️ GET " + url);
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const txt = await res.text();
+    dbg("✅ API respondeu: " + res.status);
+    showAlert("alertApi", "Status: " + res.status + "\nResposta: " + txt, res.ok ? "ok" : "err");
+  }catch(e){
+    dbg("❌ pingApi erro: " + (e?.message || "erro"));
+    showAlert("alertApi", e?.message || "Erro ao chamar API.", "err");
+  }
+}
+
+async function copyToken(){
+  const token = await getToken();
+  if(!token){
+    showAlert("alertApi", "Sem token. Faça login primeiro.", "err");
+    return;
+  }
+  await navigator.clipboard.writeText(token);
+  showAlert("alertApi", "Token copiado ✅", "ok");
+  dbg("✅ Token copiado.");
+}
+
+/* =========================
+   BIND EVENTS
+========================= */
+document.addEventListener("DOMContentLoaded", async () => {
   dbg("✅ DOMContentLoaded");
 
   document.getElementById("btnLogin").addEventListener("click", loginEmail);
   document.getElementById("btnGoogle").addEventListener("click", loginGoogle);
   document.getElementById("btnLogout").addEventListener("click", logout);
+  document.getElementById("btnPingApi").addEventListener("click", pingApi);
+  document.getElementById("btnCopyToken").addEventListener("click", copyToken);
 
-  // ENTER para logar
+  // Enter no campo senha
   document.getElementById("password").addEventListener("keydown", (e) => {
     if(e.key === "Enter") loginEmail();
   });
 
   // sessão atual
-  const { data } = await supabase.auth.getSession();
-  onLogged(data.session);
+  const { data } = await sb.auth.getSession();
+  setUI(data.session);
 
-  // mudanças de auth (quando volta do Google)
-  supabase.auth.onAuthStateChange((event, session) => {
+  // mudanças (quando volta do Google)
+  sb.auth.onAuthStateChange((event, session) => {
     dbg("🔔 AuthStateChange: " + event);
-    onLogged(session);
+    setUI(session);
     setLoading(document.getElementById("btnGoogle"), "Abrindo Google...", false);
   });
-};
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+  dbg("✅ Init completo.");
+});
 </script>
 </body>
 </html>
