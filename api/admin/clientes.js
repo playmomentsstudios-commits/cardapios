@@ -49,22 +49,29 @@ export default async function handler(req, res) {
       const whatsapp = String(body.whatsapp || "").trim();
       const ativo = body.ativo !== false;
 
+      // NOVO: tipo do negócio
+      const tipo = String(body.tipo || "restaurante").trim();
+
+      // credenciais do cliente
       const email = String(body.email || "").trim().toLowerCase();
       const senha = String(body.senha || "").trim();
 
-      if (!nome || !slug) return json(res, 400, { error: "nome/slug obrigatórios" });
+      if (!nome || !slug) {
+        return json(res, 400, { error: "nome/slug obrigatórios" });
+      }
 
-      // 1) cria/atualiza cliente
+      // 1) cria/atualiza loja
       const { data: cliente, error: e1 } = await sbAdmin
         .from("clientes")
-        .upsert({ nome, slug, whatsapp, ativo }, { onConflict: "slug" })
+        .upsert({ nome, slug, whatsapp, ativo, tipo }, { onConflict: "slug" })
         .select("*")
         .single();
 
       if (e1) return json(res, 400, { error: e1.message });
 
-      // 2) se veio email/senha: cria usuário Auth + vincula
+      // 2) cria usuário Auth + vincula
       let createdUser = null;
+      let warning = null;
 
       if (email && senha) {
         const { data: userRes, error: eU } = await sbAdmin.auth.admin.createUser({
@@ -73,27 +80,35 @@ export default async function handler(req, res) {
           email_confirm: true,
         });
 
-        if (eU) return json(res, 400, { error: `Auth createUser: ${eU.message}` });
+        if (eU) {
+          // Se já existe, não trava a loja — avisa.
+          if (String(eU.message || "").toLowerCase().includes("already")) {
+            warning = "Usuário já existe no Auth. Use 'resetar senha' ou crie com outro email.";
+          } else {
+            return json(res, 400, { error: `Auth createUser: ${eU.message}` });
+          }
+        } else {
+          createdUser = userRes.user;
 
-        createdUser = userRes.user;
+          const { error: eLink } = await sbAdmin
+            .from("cliente_usuarios")
+            .upsert(
+              {
+                cliente_slug: slug,
+                user_id: createdUser.id,
+                role: "owner",
+                ativo: true,
+              },
+              { onConflict: "cliente_slug,user_id" }
+            );
 
-        // vínculo (RLS multi-tenant)
-        const { error: eLink } = await sbAdmin
-          .from("cliente_usuarios")
-          .upsert(
-            {
-              cliente_slug: slug,
-              user_id: createdUser.id,
-              role: "owner",
-              ativo: true,
-            },
-            { onConflict: "cliente_slug,user_id" }
-          );
-
-        if (eLink) return json(res, 400, { error: `Link user: ${eLink.message}` });
+          if (eLink) return json(res, 400, { error: `Link user: ${eLink.message}` });
+        }
+      } else {
+        warning = "Sem email/senha: cliente criado sem login. Preencha email e senha para liberar acesso.";
       }
 
-      return json(res, 200, { data: cliente, user: createdUser });
+      return json(res, 200, { data: cliente, user: createdUser, warning });
     }
 
     // ATUALIZAR
@@ -105,6 +120,7 @@ export default async function handler(req, res) {
       if (body.nome != null) patch.nome = String(body.nome).trim();
       if (body.whatsapp != null) patch.whatsapp = String(body.whatsapp).trim();
       if (body.ativo != null) patch.ativo = !!body.ativo;
+      if (body.tipo != null) patch.tipo = String(body.tipo).trim();
 
       const { data, error } = await sbAdmin
         .from("clientes")
@@ -122,7 +138,6 @@ export default async function handler(req, res) {
       const slug = normSlug(req.query?.slug || "");
       if (!slug) return json(res, 400, { error: "slug obrigatório" });
 
-      // apaga primeiro filhos
       await sbAdmin.from("produtos").delete().eq("cliente_slug", slug);
       await sbAdmin.from("categorias").delete().eq("cliente_slug", slug);
       await sbAdmin.from("cliente_usuarios").delete().eq("cliente_slug", slug);
