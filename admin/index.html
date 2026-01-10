@@ -1,661 +1,1345 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin — Cardápio Digital</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Alfa • Cardápio Digital</title>
+
+  <!-- Supabase v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     :root{
-      --bg0:#07121f; --bg1:#091a2b;
-      --text:#e7eefc; --muted:rgba(231,238,252,.72);
-      --card:rgba(255,255,255,.06); --line:rgba(255,255,255,.10);
-      --primary:#2b69ff; --primary2:#1a4fd6;
-      --accent:#2ee6c5; --danger:#ff5a67;
-      --r:20px; --shadow:0 18px 60px rgba(0,0,0,.45);
+      --bg0:#050b14;
+      --bg1:#071427;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.08);
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.14);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --muted2:rgba(255,255,255,.55);
+      --blue:#2f7cf7;
+      --blue2:#1b4fd8;
+      --teal:#19c3c3;
+      --ok:#24c08a;
+      --warn:#ffb020;
+      --bad:#ff5d5d;
+      --shadow:0 18px 60px rgba(0,0,0,.42);
+      --radius:18px;
+      --radius2:14px;
+      --pad:16px;
+      --pad2:12px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0; min-height:100vh; color:var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
       background:
-        radial-gradient(1200px 800px at 15% 10%, rgba(43,105,255,.35), transparent 55%),
-        radial-gradient(900px 700px at 80% 15%, rgba(46,230,197,.18), transparent 55%),
+        radial-gradient(1200px 600px at 20% 10%, rgba(47,124,247,.35), transparent 60%),
+        radial-gradient(900px 500px at 80% 30%, rgba(25,195,195,.20), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      padding: 22px 14px 60px;
+      overflow-x:hidden;
     }
-    .wrap{max-width:1100px;margin:0 auto}
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      padding:18px;
+
+    a{color:inherit}
+    .wrap{max-width:1120px;margin:0 auto;padding:26px 16px 36px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 16px;border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid var(--stroke);
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+      gap:12px;
     }
-    .btn{
-      cursor:pointer; border:none; color:var(--text);
-      padding:11px 14px; border-radius:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      font-weight:900; display:inline-flex; gap:10px; align-items:center;
-    }
-    .btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary2))}
-    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.14);box-shadow:none}
-    .btn.danger{background:linear-gradient(135deg, rgba(255,90,103,.95), rgba(255,90,103,.70))}
-    input,select,textarea{
-      width:100%; padding:12px 12px; border-radius:14px;
-      background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.14);
-      color:var(--text); outline:none;
-    }
-    label{display:block;font-size:12.5px;font-weight:900;color:rgba(231,238,252,.80);margin:2px 0 6px}
-    .row{display:grid; grid-template-columns: repeat(12, 1fr); gap:12px}
-    .col12{grid-column:span 12} .col6{grid-column:span 6}
-    .muted{color:var(--muted); font-size:13px}
-    .top{
-      display:flex; justify-content:space-between; align-items:center; gap:12px;
-      padding:18px 18px; border-radius: var(--r);
-      background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
-      box-shadow: var(--shadow);
-    }
-    .brand{display:flex; gap:12px; align-items:center}
+    .brand{display:flex;align-items:center;gap:12px;min-width:220px}
     .logo{
-      width:54px; height:54px; border-radius:18px;
-      background: linear-gradient(135deg, rgba(43,105,255,.25), rgba(46,230,197,.15));
-      border:1px dashed rgba(255,255,255,.25);
-      display:flex; align-items:center; justify-content:center;
-      font-weight:900; letter-spacing:.6px;
+      width:46px;height:46px;border-radius:14px;
+      background:linear-gradient(135deg, rgba(47,124,247,.9), rgba(25,195,195,.65));
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+      font-weight:800;
+      letter-spacing:.6px;
     }
+    .brand h1{font-size:16px;margin:0;line-height:1.1}
+    .brand p{margin:2px 0 0;color:var(--muted2);font-size:12px}
+
+    .pillrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .pill{
+      display:flex;gap:8px;align-items:center;
+      padding:10px 12px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .pill b{color:var(--text);font-weight:700}
+    .btn{
+      border:1px solid var(--stroke2);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 12px;border-radius:12px;
+      cursor:pointer;
+      display:inline-flex;gap:8px;align-items:center;
+      transition:.15s transform,.15s opacity,.15s background;
+      user-select:none;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.08)}
+    .btn:active{transform:translateY(0px);opacity:.9}
+    .btn.primary{
+      background:linear-gradient(135deg, rgba(47,124,247,.95), rgba(27,79,216,.90));
+      border-color:rgba(255,255,255,.14);
+    }
+    .btn.danger{
+      background:rgba(255,93,93,.14);
+      border-color:rgba(255,93,93,.28);
+      color:#ffdede;
+    }
+    .btn.ghost{background:transparent}
+    .btn.small{padding:8px 10px;border-radius:10px;font-size:12px}
+    .icon{width:16px;height:16px;display:inline-block;vertical-align:middle}
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+      margin-top:16px;
+    }
+    .kpi{
+      padding:14px 16px;border-radius:20px;
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border:1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+    }
+    .kpi .t{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px}
+    .kpi .v{font-size:22px;font-weight:800;margin-top:8px}
+    .kpi .chip{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,.05);color:var(--muted)}
+    .kpi.blue .v{color:#dfeaff}
+    .kpi.teal .v{color:#d7fffb}
+    .kpi.purple .v{color:#efe7ff}
+
+    .panel{
+      margin-top:16px;
+      padding:16px;border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
+      border:1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      box-shadow:0 30px 90px rgba(0,0,0,.35);
+    }
+
     .tabs{
-      display:flex; gap:10px; justify-content:center; margin:12px 0 0;
-      padding:8px; border-radius:999px;
-      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10);
+      display:flex;gap:10px;justify-content:center;align-items:center;
+      padding:10px;border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--stroke);
+      width:fit-content;margin:0 auto 14px;
     }
     .tab{
-      cursor:pointer; padding:10px 14px; border-radius:999px;
-      border:1px solid transparent; background:transparent;
-      color:rgba(231,238,252,.85); font-weight:900; min-width:150px;
+      padding:10px 14px;border-radius:999px;
+      cursor:pointer;color:var(--muted);
+      border:1px solid transparent;
+      background:transparent;
+      font-weight:700;font-size:13px;
     }
-    .tab.active{background:rgba(43,105,255,.18); border-color:rgba(43,105,255,.35); color:var(--text)}
-    .table{margin-top:12px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04)}
-    .thead,.trow{display:grid; grid-template-columns: 1.8fr 1.1fr .7fr 56px; gap:10px; padding:12px 14px; align-items:center}
-    .thead{background:rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.10); font-size:12px; font-weight:900; color:rgba(231,238,252,.72); text-transform:uppercase}
-    .trow{border-bottom:1px solid rgba(255,255,255,.08)} .trow:last-child{border-bottom:none}
-    .chip{display:inline-flex; gap:8px; align-items:center; padding:8px 10px; border-radius:999px; font-weight:900; font-size:12px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.06)}
-    .dot{width:8px;height:8px;border-radius:99px;background:rgba(255,255,255,.35)}
-    .chip.ok{background:rgba(46,230,197,.14); border-color:rgba(46,230,197,.30)} .chip.ok .dot{background:var(--accent)}
-    .chip.off{background:rgba(255,90,103,.12); border-color:rgba(255,90,103,.22)} .chip.off .dot{background:var(--danger)}
-    .kebab{
-      width:44px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);cursor:pointer;position:relative;user-select:none;justify-self:end
+    .tab.active{
+      color:var(--text);
+      border-color:rgba(255,255,255,.12);
+      background:rgba(255,255,255,.07);
     }
+
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .field{
+      flex:1;
+      min-width:220px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    label{font-size:12px;color:var(--muted)}
+    input,select,textarea{
+      background:rgba(0,0,0,.18);
+      border:1px solid var(--stroke);
+      color:var(--text);
+      padding:12px 12px;
+      border-radius:14px;
+      outline:none;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(47,124,247,.55);
+      box-shadow:0 0 0 3px rgba(47,124,247,.18);
+    }
+    textarea{min-height:90px;resize:vertical}
+
+    .split{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:14px;
+    }
+
+    .listhead{
+      margin-top:14px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;flex-wrap:wrap;
+    }
+
+    .table{
+      margin-top:10px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid var(--stroke);
+      background:rgba(0,0,0,.12);
+    }
+    .tr{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr .9fr .6fr 64px;
+      gap:10px;
+      padding:12px 12px;
+      align-items:center;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+    .tr:first-child{border-top:none}
+    .th{
+      color:rgba(255,255,255,.62);
+      font-size:12px;
+      background:rgba(255,255,255,.04);
+      font-weight:800;
+    }
+    .td{font-size:13px;color:rgba(255,255,255,.88)}
+    .td.muted{color:var(--muted2);font-size:12px}
+    .badge{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--stroke);
+      font-size:12px;font-weight:800;
+      width:fit-content;
+      background:rgba(255,255,255,.05);
+      color:var(--muted);
+    }
+    .badge.ok{border-color:rgba(36,192,138,.35);background:rgba(36,192,138,.12);color:#c8ffe9}
+    .badge.off{border-color:rgba(255,176,32,.35);background:rgba(255,176,32,.12);color:#fff1cc}
+
+    .menuWrap{position:relative;display:flex;justify-content:flex-end}
+    .dots{
+      width:40px;height:36px;border-radius:12px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.05);
+      cursor:pointer;
+      display:grid;place-items:center;
+    }
+    .dots:hover{background:rgba(255,255,255,.08)}
     .menu{
-      position:absolute; right:0; top:46px; min-width:190px; padding:8px; border-radius:16px;
-      background:rgba(10,22,36,.92); border:1px solid rgba(255,255,255,.14); box-shadow:0 18px 60px rgba(0,0,0,.55);
-      display:none; z-index:50;
+      position:absolute;right:0;top:44px;
+      min-width:190px;
+      background:rgba(10,16,28,.92);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      display:none;
+      z-index:10;
     }
     .menu.open{display:block}
-    .mitem{
-      width:100%; display:flex; gap:10px; align-items:center; padding:10px 10px; border-radius:12px;
-      background:transparent; border:1px solid transparent; color:rgba(231,238,252,.92); cursor:pointer; font-weight:900; text-align:left
+    .mi{
+      padding:11px 12px;
+      display:flex;gap:10px;align-items:center;
+      cursor:pointer;
+      color:rgba(255,255,255,.90);
+      border-top:1px solid rgba(255,255,255,.06);
+      font-size:13px;
+      user-select:none;
     }
-    .mitem:hover{background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.10)}
-    .mitem.danger{color:rgba(255,90,103,.95)}
-    .toast{margin-top:12px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);display:none}
-    .toast.show{display:block}
-    .toast.err{border-color:rgba(255,90,103,.22);background:rgba(255,90,103,.10)}
-    .toast.ok{border-color:rgba(46,230,197,.28);background:rgba(46,230,197,.10)}
-    .hidden{display:none!important}
-    @media (max-width:640px){ .thead{display:none} .trow{grid-template-columns:1fr; gap:8px} }
+    .mi:first-child{border-top:none}
+    .mi:hover{background:rgba(255,255,255,.06)}
+    .mi.danger{color:#ffd0d0}
+    .mi .s{color:rgba(255,255,255,.55);font-size:12px;margin-left:auto}
+
+    .msg{
+      margin-top:12px;
+      padding:12px 14px;border-radius:16px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.05);
+      color:var(--muted);
+      font-size:13px;
+    }
+    .msg.bad{border-color:rgba(255,93,93,.35);background:rgba(255,93,93,.12);color:#ffdede}
+    .msg.ok{border-color:rgba(36,192,138,.35);background:rgba(36,192,138,.12);color:#dbffee}
+
+    /* LOGIN (estilo iFood) */
+    .loginShell{
+      max-width:980px;margin:24px auto 0;
+      display:grid;grid-template-columns: 1fr 1fr;
+      gap:16px;
+      align-items:stretch;
+    }
+    .loginCard{
+      border-radius:26px;
+      padding:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
+      border:1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      box-shadow:var(--shadow);
+    }
+    .loginBox{
+      display:flex;flex-direction:column;gap:12px;
+      padding:18px;
+      border-radius:22px;
+      background:rgba(0,0,0,.14);
+      border:1px solid rgba(255,255,255,.08);
+      min-height:340px;
+      justify-content:center;
+    }
+    .loginTitle{font-size:22px;margin:0}
+    .loginSub{margin:2px 0 0;color:var(--muted2);font-size:13px}
+    .stepTag{
+      width:fit-content;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      color:rgba(255,255,255,.78);
+      font-weight:800;
+      font-size:12px;
+      margin-bottom:8px;
+    }
+    .divider{
+      display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.45);
+      font-size:12px;margin:8px 0 0;
+    }
+    .divider:before,.divider:after{
+      content:"";height:1px;flex:1;background:rgba(255,255,255,.10);
+    }
+
+    @media (max-width: 960px){
+      .split{grid-template-columns:1fr}
+      .grid3{grid-template-columns:1fr}
+      .loginShell{grid-template-columns:1fr}
+      .tr{grid-template-columns: 1.1fr .9fr .9fr .6fr 56px}
+    }
   </style>
 </head>
 
 <body>
-<div class="wrap">
-
-  <div class="top">
-    <div class="brand">
-      <div class="logo">ADM</div>
-      <div>
-        <div style="font-weight:900">Admin Alfa</div>
-        <div class="muted" id="sub">Login para gerenciar clientes, categorias e produtos.</div>
-      </div>
-    </div>
-    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-      <div class="muted" id="userEmail">—</div>
-      <button class="btn danger" id="btnLogout" disabled>🚪 Sair</button>
-    </div>
-  </div>
-
-  <!-- LOGIN (clean) -->
-  <div class="card" id="loginCard" style="margin-top:14px">
-    <div class="row">
-      <div class="col12">
-        <div style="font-size:18px;font-weight:900;margin-bottom:4px">Entrar</div>
-        <div class="muted">Email/senha ou Google (Supabase Auth).</div>
-      </div>
-      <div class="col12">
-        <label>Email</label>
-        <input id="email" autocomplete="email" placeholder="admin@email.com" />
-      </div>
-      <div class="col12">
-        <label>Senha</label>
-        <input id="senha" type="password" autocomplete="current-password" placeholder="••••••••" />
-      </div>
-      <div class="col12" style="display:flex; gap:10px; flex-wrap:wrap">
-        <button class="btn primary" id="btnLogin">🔐 Acessar</button>
-        <button class="btn ghost" id="btnGoogle">🟦 Entrar com Google</button>
-      </div>
-      <div class="col12">
-        <div class="toast" id="toast"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- APP -->
-  <div id="app" class="hidden">
-    <div class="card" style="margin-top:14px">
-      <div class="tabs">
-        <button class="tab active" data-tab="clientes">🏪 Clientes</button>
-        <button class="tab" data-tab="categorias">🗂️ Categorias</button>
-        <button class="tab" data-tab="produtos">🧾 Produtos</button>
-      </div>
-
-      <div class="row" style="margin-top:12px">
-        <div class="col6">
-          <label>Busca</label>
-          <input id="search" placeholder="Buscar..." />
-        </div>
-        <div class="col6" style="display:flex; gap:10px; align-items:flex-end; justify-content:flex-end">
-          <button class="btn" id="btnReload">🔄 Recarregar</button>
+  <div class="wrap">
+    <div class="topbar" id="topbar">
+      <div class="brand">
+        <div class="logo">ADM</div>
+        <div>
+          <h1>Admin Alfa</h1>
+          <p>Clientes • Categorias • Produtos</p>
         </div>
       </div>
+
+      <div class="pillrow">
+        <div class="pill">Status: <b id="uiStatus">Deslogado</b></div>
+        <div class="pill">API: <b id="uiApi">—</b></div>
+        <button class="btn danger" id="btnLogout" style="display:none">
+          <span class="icon">⎋</span> Sair
+        </button>
+      </div>
     </div>
 
-    <div class="grid" style="display:grid;grid-template-columns:1.05fr .95fr;gap:14px;margin-top:14px">
-      <!-- FORM -->
-      <div class="card">
-        <div style="font-size:18px;font-weight:900" id="formTitle">Cadastrar Cliente</div>
-        <div class="muted" id="formSub">Crie cliente + acesso (email/senha) do dono.</div>
+    <!-- LOGIN -->
+    <div class="loginShell" id="loginShell">
+      <div class="loginCard">
+        <div class="loginBox">
+          <div class="stepTag" id="stepTag">Passo 1/2</div>
+          <h2 class="loginTitle" id="stepTitle">Entre na sua conta</h2>
+          <p class="loginSub" id="stepSub">Use email/senha (Supabase) ou Google.</p>
 
-        <!-- Clientes -->
-        <div id="formClientes" style="margin-top:10px">
-          <div class="row">
-            <div class="col12">
-              <label>Nome</label>
-              <input id="cli_nome" placeholder="ex: Cuscuz da Baiana" />
+          <div id="stepEmail">
+            <div class="field">
+              <label>Email</label>
+              <input id="email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" />
             </div>
-            <div class="col6">
-              <label>Slug</label>
-              <input id="cli_slug" placeholder="ex: cuscuz-da-baiana" />
-            </div>
-            <div class="col6">
-              <label>WhatsApp</label>
-              <input id="cli_whatsapp" placeholder="5562..." />
-            </div>
-            <div class="col12">
-              <label>Logo (URL)</label>
-              <input id="cli_logo_url" placeholder="https://..." />
-            </div>
-            <div class="col6">
-              <label>Status</label>
-              <select id="cli_ativo">
-                <option value="true">Ativo</option>
-                <option value="false">Inativo</option>
-              </select>
-            </div>
-
-            <div class="col12" style="height:1px;background:rgba(255,255,255,.10);margin:6px 0"></div>
-
-            <div class="col12">
-              <label>Email do dono (login)</label>
-              <input id="cli_email" autocomplete="email" placeholder="cliente@email.com" />
-            </div>
-            <div class="col12">
-              <label>Senha do dono</label>
-              <input id="cli_senha" type="password" autocomplete="new-password" placeholder="Crie uma senha" />
-            </div>
-
-            <div class="col12" style="display:flex; gap:10px; flex-wrap:wrap">
-              <button class="btn" id="btnClear">🧹 Limpar</button>
-              <button class="btn accent" id="btnSave">💾 Salvar</button>
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn primary" id="btnGoPass">Continuar</button>
+              <button class="btn" id="btnGoogle1">Entrar com Google</button>
             </div>
           </div>
-        </div>
 
-        <!-- Categorias -->
-        <div id="formCategorias" class="hidden" style="margin-top:10px">
-          <div class="row">
-            <div class="col12">
-              <label>Cliente (slug)</label>
-              <select id="cat_cliente_slug"></select>
+          <div id="stepPass" style="display:none">
+            <div class="field">
+              <label>Email</label>
+              <input id="email2" type="email" disabled />
             </div>
-            <div class="col12">
-              <label>Nome</label>
-              <input id="cat_nome" placeholder="ex: Bebidas" />
+            <div class="field" style="margin-top:10px">
+              <label>Senha</label>
+              <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" />
             </div>
-            <div class="col6">
-              <label>Ordem</label>
-              <input id="cat_ordem" type="number" placeholder="1" />
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn primary" id="btnLogin">Entrar</button>
+              <button class="btn" id="btnGoogle2">Entrar com Google</button>
+              <button class="btn ghost" id="btnBack">Voltar</button>
             </div>
-            <div class="col6">
-              <label>Status</label>
-              <select id="cat_ativo">
-                <option value="true">Ativa</option>
-                <option value="false">Inativa</option>
-              </select>
-            </div>
-            <div class="col12"><button class="btn accent" id="btnSaveCat">💾 Salvar</button></div>
           </div>
-        </div>
 
-        <!-- Produtos -->
-        <div id="formProdutos" class="hidden" style="margin-top:10px">
-          <div class="row">
-            <div class="col12">
-              <label>Cliente (slug)</label>
-              <select id="p_cliente_slug"></select>
-            </div>
-            <div class="col12">
-              <label>Categoria</label>
-              <select id="p_categoria"></select>
-            </div>
-            <div class="col12">
-              <label>Nome</label>
-              <input id="p_nome" placeholder="ex: Café coado" />
-            </div>
-            <div class="col12">
-              <label>Descrição</label>
-              <textarea id="p_desc" placeholder="opcional"></textarea>
-            </div>
-            <div class="col6">
-              <label>Preço</label>
-              <input id="p_preco" type="number" step="0.01" placeholder="9.90" />
-            </div>
-            <div class="col6">
-              <label>Status</label>
-              <select id="p_ativo">
-                <option value="true">Ativo</option>
-                <option value="false">Inativo</option>
-              </select>
-            </div>
-            <div class="col12">
-              <label>Imagem (URL) — coluna: imagem</label>
-              <input id="p_img" placeholder="https://..." />
-            </div>
-            <div class="col6">
-              <label>Ordem</label>
-              <input id="p_ordem" type="number" placeholder="1" />
-            </div>
-            <div class="col12"><button class="btn accent" id="btnSaveProd">💾 Salvar</button></div>
-          </div>
+          <div class="msg bad" id="loginErr" style="display:none"></div>
         </div>
-
-        <div class="toast" id="toast2"></div>
       </div>
 
-      <!-- LIST -->
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:end;gap:10px">
+      <div class="loginCard">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:14px">
+          <div class="badge" style="width:fit-content">Dica rápida</div>
+          <div style="color:var(--muted);font-size:13px;line-height:1.5">
+            • Se clicar e “não acontecer nada”, normalmente é <b>token</b> não sendo enviado ou <b>CORS</b> no endpoint.<br/>
+            • Este admin envia automaticamente o token do Supabase no header <b>Authorization</b>.<br/>
+            • API Vercel configurada em: <b id="uiApi2">—</b>.
+          </div>
+
+          <div class="divider">Config</div>
+          <div class="field">
+            <label>URL da API (Vercel)</label>
+            <input id="apiBaseInput" placeholder="https://seu-projeto.vercel.app" />
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn small" id="btnSaveApi">Salvar API</button>
+            <button class="btn small" id="btnResetApi">Reset</button>
+          </div>
+          <div class="msg" style="margin:0">
+            Padrão: <b>https://cafeteria-gamma-orpin.vercel.app</b>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app" style="display:none">
+      <div class="grid3">
+        <div class="kpi blue">
+          <div class="t"><span>Clientes</span><span class="chip">Total</span></div>
+          <div class="v" id="kpiClientes">—</div>
+        </div>
+        <div class="kpi teal">
+          <div class="t"><span>Categorias</span><span class="chip">Total</span></div>
+          <div class="v" id="kpiCategorias">—</div>
+        </div>
+        <div class="kpi purple">
+          <div class="t"><span>Produtos</span><span class="chip">Total</span></div>
+          <div class="v" id="kpiProdutos">—</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="tabs">
+          <button class="tab active" data-tab="clientes">Clientes</button>
+          <button class="tab" data-tab="categorias">Categorias</button>
+          <button class="tab" data-tab="produtos">Produtos</button>
+        </div>
+
+        <div id="msgGlobal" class="msg" style="display:none"></div>
+
+        <!-- CLIENTES -->
+        <div class="split" id="tab-clientes">
           <div>
-            <div style="font-size:18px;font-weight:900" id="listTitle">Clientes</div>
-            <div class="muted" id="listSub">Menu ⋯ com ações.</div>
+            <h2 style="margin:6px 0 6px">Cadastrar Cliente</h2>
+            <div class="row">
+              <div class="field">
+                <label>Nome</label>
+                <input id="cli_nome" placeholder="ex: Cuscuz da Baiana" />
+              </div>
+              <div class="field">
+                <label>Slug</label>
+                <input id="cli_slug" placeholder="ex: cuscuz-da-baiana" />
+              </div>
+              <div class="field">
+                <label>WhatsApp</label>
+                <input id="cli_whats" placeholder="ex: 62999999999" />
+              </div>
+              <div class="field">
+                <label>Status</label>
+                <select id="cli_ativo">
+                  <option value="true">Ativo</option>
+                  <option value="false">Inativo</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+              <div class="field">
+                <label>Email do dono (opcional)</label>
+                <input id="cli_owner_email" placeholder="ex: dono@loja.com" />
+              </div>
+              <div class="field">
+                <label>Senha do dono (opcional)</label>
+                <input id="cli_owner_pass" type="password" placeholder="defina uma senha" />
+              </div>
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+              <button class="btn primary" id="btnSalvarCliente">Salvar</button>
+              <button class="btn" id="btnLimparCliente">Limpar</button>
+              <span class="badge" id="cli_hint">Link: ?u=slug</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="listhead">
+              <div>
+                <h2 style="margin:6px 0 2px">Clientes</h2>
+                <div class="td muted">Lista em linha + menu ⋯</div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                <input id="cli_search" placeholder="Buscar..." style="min-width:240px" />
+                <button class="btn small" id="btnReloadClientes">Recarregar</button>
+              </div>
+            </div>
+
+            <div class="table" id="tblClientes">
+              <div class="tr th">
+                <div>Nome</div>
+                <div>Slug</div>
+                <div>WhatsApp</div>
+                <div>Status</div>
+                <div></div>
+              </div>
+              <!-- rows -->
+            </div>
           </div>
         </div>
 
-        <div class="table">
-          <div class="thead" id="thead">
-            <div>Nome</div><div>Slug/Ref</div><div>Status</div><div style="text-align:right">⋯</div>
+        <!-- CATEGORIAS -->
+        <div class="split" id="tab-categorias" style="display:none">
+          <div>
+            <h2 style="margin:6px 0 6px">Cadastrar Categoria</h2>
+            <div class="row">
+              <div class="field">
+                <label>Cliente</label>
+                <select id="cat_cliente"></select>
+              </div>
+              <div class="field">
+                <label>Nome</label>
+                <input id="cat_nome" placeholder="ex: Bebidas" />
+              </div>
+              <div class="field">
+                <label>Ordem</label>
+                <input id="cat_ordem" type="number" placeholder="ex: 1" />
+              </div>
+              <div class="field">
+                <label>Status</label>
+                <select id="cat_ativo">
+                  <option value="true">Ativa</option>
+                  <option value="false">Inativa</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn primary" id="btnSalvarCategoria">Salvar</button>
+              <button class="btn" id="btnLimparCategoria">Limpar</button>
+            </div>
           </div>
-          <div id="tbody"></div>
+
+          <div>
+            <div class="listhead">
+              <div>
+                <h2 style="margin:6px 0 2px">Categorias</h2>
+                <div class="td muted">Por cliente, com menu ⋯</div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                <input id="cat_search" placeholder="Buscar..." style="min-width:240px" />
+                <button class="btn small" id="btnReloadCategorias">Recarregar</button>
+              </div>
+            </div>
+
+            <div class="table" id="tblCategorias">
+              <div class="tr th" style="grid-template-columns: 1fr .9fr .6fr .6fr 64px">
+                <div>Nome</div>
+                <div>Cliente</div>
+                <div>Ordem</div>
+                <div>Status</div>
+                <div></div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- PRODUTOS -->
+        <div class="split" id="tab-produtos" style="display:none">
+          <div>
+            <h2 style="margin:6px 0 6px">Cadastrar Produto</h2>
+            <div class="row">
+              <div class="field">
+                <label>Cliente</label>
+                <select id="pro_cliente"></select>
+              </div>
+              <div class="field">
+                <label>Categoria</label>
+                <select id="pro_categoria"></select>
+              </div>
+              <div class="field">
+                <label>Nome</label>
+                <input id="pro_nome" placeholder="ex: Cappuccino" />
+              </div>
+              <div class="field">
+                <label>Preço</label>
+                <input id="pro_preco" type="number" step="0.01" placeholder="ex: 12.50" />
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+              <div class="field" style="min-width:280px">
+                <label>Descrição</label>
+                <textarea id="pro_desc" placeholder="opcional"></textarea>
+              </div>
+              <div class="field">
+                <label>Imagem (URL)</label>
+                <input id="pro_img" placeholder="https://..." />
+              </div>
+              <div class="field">
+                <label>Status</label>
+                <select id="pro_ativo">
+                  <option value="true">Ativo</option>
+                  <option value="false">Inativo</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn primary" id="btnSalvarProduto">Salvar</button>
+              <button class="btn" id="btnLimparProduto">Limpar</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="listhead">
+              <div>
+                <h2 style="margin:6px 0 2px">Produtos</h2>
+                <div class="td muted">Lista em linha + menu ⋯</div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                <input id="pro_search" placeholder="Buscar..." style="min-width:240px" />
+                <button class="btn small" id="btnReloadProdutos">Recarregar</button>
+              </div>
+            </div>
+
+            <div class="table" id="tblProdutos">
+              <div class="tr th" style="grid-template-columns: 1.1fr .8fr .8fr .6fr 64px">
+                <div>Nome</div>
+                <div>Cliente</div>
+                <div>Categoria</div>
+                <div>Status</div>
+                <div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
-</div>
+  <script>
+    /* =========================
+      CONFIG
+    ========================== */
+    const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
+    const SUPABASE_ANON = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
 
-<script>
-/* ========= CONFIG ========= */
-const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
+    const DEFAULT_API_BASE = "https://cafeteria-gamma-orpin.vercel.app";
+    const LS_API = "CARDAPIO_API_BASE";
 
-/** 🔧 Troque para sua URL do Vercel */
-const API_BASE = "https://SEU-PROJETO.vercel.app";
+    const apiBase = () => (localStorage.getItem(LS_API) || DEFAULT_API_BASE).replace(/\/+$/,"");
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-let session=null, user=null;
-let tab="clientes";
-let editing={ clientes:null, categorias:null, produtos:null };
-let clientes=[], categorias=[], produtos=[];
+    /* =========================
+      UI helpers
+    ========================== */
+    const $ = (id) => document.getElementById(id);
 
-const el = (id)=>document.getElementById(id);
-const toast = (msg, type="ok", which=1)=>{
-  const t = which===1 ? el("toast") : el("toast2");
-  t.className = "toast show " + (type==="err" ? "err":"ok");
-  t.textContent = msg;
-  setTimeout(()=> t.className="toast", 3200);
-};
-function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]))}
+    function setStatus(text){
+      $("uiStatus").textContent = text;
+    }
+    function setApiUi(){
+      const h = apiBase().replace(/^https?:\/\//,"");
+      $("uiApi").textContent = h;
+      $("uiApi2").textContent = apiBase();
+      $("apiBaseInput").value = apiBase();
+    }
+    function showMsg(text, type=""){
+      const el = $("msgGlobal");
+      el.style.display = "block";
+      el.className = "msg" + (type ? " "+type : "");
+      el.textContent = text;
+      setTimeout(()=>{ el.style.display="none"; }, 5000);
+    }
+    function showLoginErr(text){
+      const el = $("loginErr");
+      el.style.display = "block";
+      el.textContent = text;
+    }
+    function clearLoginErr(){ $("loginErr").style.display="none"; $("loginErr").textContent=""; }
 
-function closeAllMenus(){ document.querySelectorAll(".menu.open").forEach(m=>m.classList.remove("open")); }
-document.addEventListener("click",(e)=>{ if(!e.target.closest(".menu") && !e.target.closest(".kebab")) closeAllMenus(); });
-
-async function apiFetch(path, {method="GET", body=null}={}){
-  if(!session?.access_token) throw new Error("Faça login.");
-  const res = await fetch(`${API_BASE}${path}`,{
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization": `Bearer ${session.access_token}`   // ✅ token do admin logado
-    },
-    body: body ? JSON.stringify(body) : null
-  });
-  const json = await res.json().catch(()=> ({}));
-  if(!res.ok) throw new Error(json.error || `Erro ${res.status}`);
-  return json;
-}
-
-/* ========= AUTH ========= */
-async function refreshAuth(){
-  const { data } = await sb.auth.getSession();
-  session = data.session || null;
-  user = session?.user || null;
-
-  el("userEmail").textContent = user?.email || "—";
-  el("btnLogout").disabled = !session;
-
-  el("loginCard").classList.toggle("hidden", !!session);
-  el("app").classList.toggle("hidden", !session);
-
-  if(session){
-    await loadAll();
-  }
-}
-
-async function loginPass(){
-  const email = el("email").value.trim();
-  const password = el("senha").value;
-  if(!email || !password) return toast("Preencha email e senha.", "err");
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if(error) return toast(error.message, "err");
-  toast("Login ok!");
-  await refreshAuth();
-}
-
-async function loginGoogle(){
-  const redirectTo = window.location.origin + window.location.pathname;
-  const { error } = await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo }});
-  if(error) toast(error.message, "err");
-}
-
-async function logout(){
-  await sb.auth.signOut();
-  await refreshAuth();
-}
-
-/* ========= TABS ========= */
-function setTab(next){
-  tab=next;
-  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active", b.dataset.tab===tab));
-
-  el("formClientes").classList.toggle("hidden", tab!=="clientes");
-  el("formCategorias").classList.toggle("hidden", tab!=="categorias");
-  el("formProdutos").classList.toggle("hidden", tab!=="produtos");
-
-  if(tab==="clientes"){
-    el("formTitle").textContent="Cadastrar Cliente";
-    el("formSub").textContent="Crie cliente + acesso (email/senha) do dono.";
-    el("listTitle").textContent="Clientes";
-    el("listSub").textContent="Menu ⋯ com ações.";
-    el("thead").innerHTML=`<div>Nome</div><div>Slug/Ref</div><div>Status</div><div style="text-align:right">⋯</div>`;
-  }else if(tab==="categorias"){
-    el("formTitle").textContent="Cadastrar Categoria";
-    el("formSub").textContent="Categorias por cliente.";
-    el("listTitle").textContent="Categorias";
-    el("listSub").textContent="Menu ⋯ com ações.";
-    el("thead").innerHTML=`<div>Nome</div><div>Cliente/Ordem</div><div>Status</div><div style="text-align:right">⋯</div>`;
-  }else{
-    el("formTitle").textContent="Cadastrar Produto";
-    el("formSub").textContent="Produtos por cliente e categoria.";
-    el("listTitle").textContent="Produtos";
-    el("listSub").textContent="Menu ⋯ com ações.";
-    el("thead").innerHTML=`<div>Nome</div><div>Cliente/Preço</div><div>Status</div><div style="text-align:right">⋯</div>`;
-  }
-  render();
-}
-
-/* ========= LOAD ========= */
-async function loadAll(){
-  try{
-    const [c1,c2,c3] = await Promise.all([
-      apiFetch("/api/admin/clientes"),
-      apiFetch("/api/admin/categorias"),
-      apiFetch("/api/admin/produtos"),
-    ]);
-    clientes = c1.data || c1 || [];
-    categorias = c2.data || c2 || [];
-    produtos = c3.data || c3 || [];
-    fillSelects();
-    render();
-    toast("Carregado.", "ok", 2);
-  }catch(e){
-    console.error(e);
-    toast(e.message, "err", 2);
-  }
-}
-
-function fillSelects(){
-  const opts = `<option value="">Selecione...</option>` + clientes
-    .slice().sort((a,b)=>String(a.nome||"").localeCompare(String(b.nome||"")))
-    .map(c=>`<option value="${esc(c.slug)}">${esc(c.nome)} (${esc(c.slug)})</option>`).join("");
-
-  el("cat_cliente_slug").innerHTML = opts;
-  el("p_cliente_slug").innerHTML = opts;
-  rebuildCategoriasSelect();
-}
-function rebuildCategoriasSelect(){
-  const slug = el("p_cliente_slug").value || "";
-  const list = categorias.filter(c=>String(c.cliente_slug)===String(slug))
-    .slice().sort((a,b)=>Number(a.ordem||0)-Number(b.ordem||0));
-
-  el("p_categoria").innerHTML = `<option value="">Selecione...</option>` +
-    list.map(c=>`<option value="${c.id}">${esc(c.nome)} (#${c.id})</option>`).join("");
-}
-
-/* ========= CRUD ========= */
-function clearForms(){
-  ["cli_nome","cli_slug","cli_whatsapp","cli_logo_url","cli_email","cli_senha"].forEach(id=>el(id).value="");
-  el("cli_ativo").value="true";
-  ["cat_nome","cat_ordem"].forEach(id=>el(id).value="");
-  el("cat_ativo").value="true"; el("cat_cliente_slug").value="";
-  ["p_nome","p_desc","p_preco","p_img","p_ordem"].forEach(id=>el(id).value="");
-  el("p_ativo").value="true"; el("p_cliente_slug").value=""; rebuildCategoriasSelect(); el("p_categoria").value="";
-}
-
-async function saveCliente(){
-  try{
-    const nome = el("cli_nome").value.trim();
-    const slug = el("cli_slug").value.trim();
-    const whatsapp = el("cli_whatsapp").value.trim();
-    const logo_url = el("cli_logo_url").value.trim();
-    const ativo = el("cli_ativo").value==="true";
-
-    const email = el("cli_email").value.trim();
-    const senha = el("cli_senha").value;
-
-    if(!nome || !slug) throw new Error("Nome e slug obrigatórios.");
-
-    // cria cliente + acesso (endpoint que cria user+vinculo)
-    if(email && senha){
-      await apiFetch("/api/admin/criarClienteComAcesso", { method:"POST", body:{ nome, slug, whatsapp, logo_url, ativo, email, senha, role:"owner" }});
-      toast("Cliente + acesso criado!", "ok", 2);
-      clearForms();
-      await loadAll();
-      return;
+    function slugify(str){
+      return (str||"")
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+        .replace(/[^a-z0-9]+/g,"-")
+        .replace(/(^-|-$)/g,"")
+        .slice(0,80);
     }
 
-    // sem acesso, usa seu endpoint padrão
-    await apiFetch("/api/admin/clientes", { method:"POST", body:{ action:"create", nome, slug, whatsapp, logo_url, ativo }});
-    toast("Cliente criado!", "ok", 2);
-    clearForms();
-    await loadAll();
-  }catch(e){
-    console.error(e);
-    toast(e.message, "err", 2);
-  }
-}
+    /* =========================
+      Auth + API
+    ========================== */
+    async function getToken(){
+      const { data } = await sb.auth.getSession();
+      return data?.session?.access_token || null;
+    }
 
-async function saveCategoria(){
-  try{
-    const cliente_slug = el("cat_cliente_slug").value;
-    const nome = el("cat_nome").value.trim();
-    const ordem = Number(el("cat_ordem").value||0);
-    const ativo = el("cat_ativo").value==="true";
-    if(!cliente_slug || !nome) throw new Error("Cliente e nome obrigatórios.");
+    async function apiFetch(path, opts={}){
+      const url = apiBase() + path;
+      const token = await getToken();
 
-    await apiFetch("/api/admin/categorias", { method:"POST", body:{ action:"create", cliente_slug, nome, ordem, ativo }});
-    toast("Categoria criada!", "ok", 2);
-    clearForms();
-    await loadAll();
-  }catch(e){
-    console.error(e);
-    toast(e.message, "err", 2);
-  }
-}
+      const headers = Object.assign(
+        { "Content-Type":"application/json" },
+        opts.headers || {}
+      );
 
-async function saveProduto(){
-  try{
-    const cliente_slug = el("p_cliente_slug").value;
-    const categoria_id = Number(el("p_categoria").value||0);
-    const nome = el("p_nome").value.trim();
-    const descricao = el("p_desc").value.trim();
-    const preco = Number(el("p_preco").value||0);
-    const imagem = el("p_img").value.trim();
-    const ordem = Number(el("p_ordem").value||0);
-    const ativo = el("p_ativo").value==="true";
+      if (token) headers["Authorization"] = "Bearer " + token;
 
-    if(!cliente_slug || !categoria_id || !nome) throw new Error("Cliente, categoria e nome obrigatórios.");
+      const res = await fetch(url, {
+        method: opts.method || "GET",
+        headers,
+        body: opts.body ? JSON.stringify(opts.body) : undefined
+      });
 
-    await apiFetch("/api/admin/produtos", { method:"POST", body:{ action:"create", cliente_slug, categoria_id, nome, descricao, preco, imagem, ordem, ativo }});
-    toast("Produto criado!", "ok", 2);
-    clearForms();
-    await loadAll();
-  }catch(e){
-    console.error(e);
-    toast(e.message, "err", 2);
-  }
-}
+      let json = null;
+      try { json = await res.json(); } catch(e){}
 
-/* ========= LIST ========= */
-function chip(ativo, a="Ativo", i="Inativo"){
-  return `<span class="chip ${ativo?"ok":"off"}"><span class="dot"></span>${ativo?a:i}</span>`;
-}
-function kebab(kind, item){
-  const id=item.id;
-  return `
-    <div class="kebab" data-k="${kind}" data-id="${id}">
-      <span>⋯</span>
-      <div class="menu" id="m-${kind}-${id}">
-        <button class="mitem" data-act="toggle" data-k="${kind}" data-id="${id}">⏻ ${item.ativo?"Desativar":"Ativar"}</button>
-        <button class="mitem danger" data-act="del" data-k="${kind}" data-id="${id}">🗑️ Excluir</button>
-      </div>
-    </div>
-  `;
-}
-function bindMenus(){
-  document.querySelectorAll(".kebab").forEach(k=>{
-    k.onclick=(e)=>{
-      e.stopPropagation();
-      const kind=k.dataset.k, id=k.dataset.id;
-      const m=document.getElementById(`m-${kind}-${id}`);
-      const open=m.classList.contains("open");
-      closeAllMenus(); if(!open) m.classList.add("open");
+      if (!res.ok){
+        const msg = (json && (json.error || json.message)) ? (json.error || json.message) : ("HTTP " + res.status);
+        throw new Error(msg);
+      }
+      return json;
+    }
+
+    /* =========================
+      Login flow (Email -> Senha + Google)
+    ========================== */
+    function goToPassStep(email){
+      $("stepEmail").style.display = "none";
+      $("stepPass").style.display = "block";
+      $("stepTag").textContent = "Passo 2/2";
+      $("email2").value = email || "";
+      $("pass").focus();
+    }
+    function goToEmailStep(){
+      $("stepPass").style.display = "none";
+      $("stepEmail").style.display = "block";
+      $("stepTag").textContent = "Passo 1/2";
+      $("email").focus();
+    }
+
+    async function loginWithPassword(){
+      clearLoginErr();
+      const email = ($("email2").value || "").trim();
+      const pass = $("pass").value || "";
+      if (!email) return showLoginErr("Informe seu email.");
+      if (!pass) return showLoginErr("Informe sua senha.");
+
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) return showLoginErr(error.message || "Erro ao entrar.");
+      if (!data?.session) return showLoginErr("Sessão não criada.");
+    }
+
+    async function loginWithGoogle(){
+      clearLoginErr();
+      const redirectTo = window.location.origin + window.location.pathname; // volta pra /admin/
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo }
+      });
+      if (error) showLoginErr(error.message || "Erro no Google.");
+    }
+
+    async function logout(){
+      await sb.auth.signOut();
+    }
+
+    /* =========================
+      State + Data
+    ========================== */
+    let clientes = [];
+    let categorias = [];
+    let produtos = [];
+    let editing = { clientes:null, categorias:null, produtos:null };
+
+    function setTab(name){
+      document.querySelectorAll(".tab").forEach(b=>{
+        b.classList.toggle("active", b.dataset.tab === name);
+      });
+      ["clientes","categorias","produtos"].forEach(t=>{
+        $("tab-"+t).style.display = (t===name) ? "grid" : "none";
+      });
+    }
+
+    function closeAllMenus(){
+      document.querySelectorAll(".menu").forEach(m=>m.classList.remove("open"));
+    }
+    document.addEventListener("click",(e)=>{
+      if (!e.target.closest(".menuWrap")) closeAllMenus();
+    });
+
+    function menuHtml(items){
+      // items: [{label, onClick, danger, hint}]
+      return "";
+    }
+
+    function makeDotsMenu(actions){
+      const wrap = document.createElement("div");
+      wrap.className = "menuWrap";
+
+      const btn = document.createElement("button");
+      btn.className = "dots";
+      btn.type = "button";
+      btn.textContent = "⋯";
+
+      const menu = document.createElement("div");
+      menu.className = "menu";
+
+      actions.forEach(a=>{
+        const mi = document.createElement("div");
+        mi.className = "mi" + (a.danger ? " danger" : "");
+        mi.innerHTML = `<span class="icon">${a.icon||"•"}</span><span>${a.label}</span>` + (a.hint ? `<span class="s">${a.hint}</span>` : "");
+        mi.onclick = () => { menu.classList.remove("open"); a.onClick(); };
+        menu.appendChild(mi);
+      });
+
+      btn.onclick = (ev) => {
+        ev.stopPropagation();
+        closeAllMenus();
+        menu.classList.toggle("open");
+      };
+
+      wrap.appendChild(btn);
+      wrap.appendChild(menu);
+      return wrap;
+    }
+
+    function fmtWhats(w){ return (w||"").toString().replace(/[^\d]/g,""); }
+
+    /* =========================
+      Render
+    ========================== */
+    function renderKPIs(){
+      $("kpiClientes").textContent = clientes.length;
+      $("kpiCategorias").textContent = categorias.length;
+      $("kpiProdutos").textContent = produtos.length;
+    }
+
+    function renderSelects(){
+      const cliOpts = clientes
+        .slice()
+        .sort((a,b)=>(a.nome||"").localeCompare(b.nome||""))
+        .map(c=>`<option value="${c.slug}">${c.nome} (${c.slug})</option>`)
+        .join("");
+
+      $("cat_cliente").innerHTML = `<option value="">Selecione...</option>` + cliOpts;
+      $("pro_cliente").innerHTML = `<option value="">Selecione...</option>` + cliOpts;
+
+      // categoria depende do cliente selecionado
+      updateCategoriaSelectByCliente();
+    }
+
+    function updateCategoriaSelectByCliente(){
+      const cli = $("pro_cliente").value;
+      const cats = categorias
+        .filter(c => (c.cliente_slug || c.cliente || c.clienteId || c.cliente_id) === cli || c.cliente_slug === cli || c.cliente === cli)
+        .slice()
+        .sort((a,b)=>(a.ordem||0)-(b.ordem||0));
+
+      const opts = cats.map(c=>`<option value="${c.id}">${c.nome}</option>`).join("");
+      $("pro_categoria").innerHTML = `<option value="">Selecione...</option>` + opts;
+    }
+
+    function renderClientes(){
+      const q = ($("cli_search").value||"").toLowerCase().trim();
+      const tbl = $("tblClientes");
+      tbl.querySelectorAll(".tr.data").forEach(n=>n.remove());
+
+      const rows = clientes.filter(c=>{
+        if(!q) return true;
+        return (c.nome||"").toLowerCase().includes(q) || (c.slug||"").toLowerCase().includes(q);
+      });
+
+      rows.forEach(c=>{
+        const tr = document.createElement("div");
+        tr.className = "tr data";
+
+        const ativo = (c.ativo === true || c.ativo === "true");
+
+        tr.innerHTML = `
+          <div class="td">${c.nome || "-"}</div>
+          <div class="td muted">${c.slug || "-"}</div>
+          <div class="td muted">${fmtWhats(c.whatsapp || "") || "-"}</div>
+          <div class="td">${ativo ? `<span class="badge ok">Ativo</span>` : `<span class="badge off">Inativo</span>`}</div>
+          <div></div>
+        `;
+
+        const actions = makeDotsMenu([
+          { icon:"👁", label:"Ver publicado", onClick:()=> openPublic(c.slug), hint:"?u="+c.slug },
+          { icon:"🔗", label:"Copiar link", onClick:()=> copyText(publicUrl(c.slug)) },
+          { icon:"✏️", label:"Editar", onClick:()=> loadClienteToForm(c) },
+          { icon:"📄", label:"Duplicar", onClick:()=> duplicateCliente(c) },
+          { icon: ativo ? "⛔" : "✅", label: ativo ? "Desativar" : "Ativar", onClick:()=> toggleCliente(c) },
+          { icon:"🗑", label:"Excluir", danger:true, onClick:()=> deleteCliente(c) },
+        ]);
+        tr.lastElementChild.appendChild(actions);
+        tbl.appendChild(tr);
+      });
+    }
+
+    function renderCategorias(){
+      const q = ($("cat_search").value||"").toLowerCase().trim();
+      const tbl = $("tblCategorias");
+      tbl.querySelectorAll(".tr.data").forEach(n=>n.remove());
+
+      const cliBySlug = Object.fromEntries(clientes.map(c=>[c.slug, c]));
+
+      const rows = categorias.filter(c=>{
+        if(!q) return true;
+        const cli = cliBySlug[c.cliente_slug]?.nome || c.cliente_slug || "";
+        return (c.nome||"").toLowerCase().includes(q) || cli.toLowerCase().includes(q);
+      });
+
+      rows.forEach(cat=>{
+        const tr = document.createElement("div");
+        tr.className = "tr data";
+        tr.style.gridTemplateColumns = "1fr .9fr .6fr .6fr 64px";
+
+        const ativo = (cat.ativo === true || cat.ativo === "true");
+        const cliName = (cliBySlug[cat.cliente_slug]?.nome) || cat.cliente_slug || "-";
+
+        tr.innerHTML = `
+          <div class="td">${cat.nome || "-"}</div>
+          <div class="td muted">${cliName}</div>
+          <div class="td muted">${cat.ordem ?? "-"}</div>
+          <div class="td">${ativo ? `<span class="badge ok">Ativa</span>` : `<span class="badge off">Inativa</span>`}</div>
+          <div></div>
+        `;
+
+        const actions = makeDotsMenu([
+          { icon:"✏️", label:"Editar", onClick:()=> loadCategoriaToForm(cat) },
+          { icon:"📄", label:"Duplicar", onClick:()=> duplicateCategoria(cat) },
+          { icon: ativo ? "⛔" : "✅", label: ativo ? "Desativar" : "Ativar", onClick:()=> toggleCategoria(cat) },
+          { icon:"🗑", label:"Excluir", danger:true, onClick:()=> deleteCategoria(cat) },
+        ]);
+        tr.lastElementChild.appendChild(actions);
+        tbl.appendChild(tr);
+      });
+    }
+
+    function renderProdutos(){
+      const q = ($("pro_search").value||"").toLowerCase().trim();
+      const tbl = $("tblProdutos");
+      tbl.querySelectorAll(".tr.data").forEach(n=>n.remove());
+
+      const cliBySlug = Object.fromEntries(clientes.map(c=>[c.slug, c]));
+      const catById = Object.fromEntries(categorias.map(c=>[c.id, c]));
+
+      const rows = produtos.filter(p=>{
+        if(!q) return true;
+        const cli = cliBySlug[p.cliente_slug]?.nome || p.cliente_slug || "";
+        const cat = catById[p.categoria_id]?.nome || "";
+        return (p.nome||"").toLowerCase().includes(q) || cli.toLowerCase().includes(q) || cat.toLowerCase().includes(q);
+      });
+
+      rows.forEach(p=>{
+        const tr = document.createElement("div");
+        tr.className = "tr data";
+        tr.style.gridTemplateColumns = "1.1fr .8fr .8fr .6fr 64px";
+
+        const ativo = (p.ativo === true || p.ativo === "true");
+        const cliName = cliBySlug[p.cliente_slug]?.nome || p.cliente_slug || "-";
+        const catName = catById[p.categoria_id]?.nome || "-";
+
+        tr.innerHTML = `
+          <div class="td">${p.nome || "-"}</div>
+          <div class="td muted">${cliName}</div>
+          <div class="td muted">${catName}</div>
+          <div class="td">${ativo ? `<span class="badge ok">Ativo</span>` : `<span class="badge off">Inativo</span>`}</div>
+          <div></div>
+        `;
+
+        const actions = makeDotsMenu([
+          { icon:"✏️", label:"Editar", onClick:()=> loadProdutoToForm(p) },
+          { icon:"📄", label:"Duplicar", onClick:()=> duplicateProduto(p) },
+          { icon: ativo ? "⛔" : "✅", label: ativo ? "Desativar" : "Ativar", onClick:()=> toggleProduto(p) },
+          { icon:"🗑", label:"Excluir", danger:true, onClick:()=> deleteProduto(p) },
+        ]);
+        tr.lastElementChild.appendChild(actions);
+        tbl.appendChild(tr);
+      });
+    }
+
+    function publicUrl(slug){
+      // github pages /cafeteria/?u=slug
+      const base = window.location.origin + "/cafeteria/";
+      return base + "?u=" + encodeURIComponent(slug);
+    }
+    function openPublic(slug){
+      window.open(publicUrl(slug), "_blank");
+    }
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        showMsg("Link copiado ✅", "ok");
+      }catch{
+        prompt("Copie:", text);
+      }
+    }
+
+    /* =========================
+      CRUD calls (API Vercel)
+      Ajuste se seus endpoints usarem nomes diferentes.
+    ========================== */
+    async function loadAll(){
+      try{
+        const [c1,c2,c3] = await Promise.all([
+          apiFetch("/api/admin/clientes"),
+          apiFetch("/api/admin/categorias"),
+          apiFetch("/api/admin/produtos"),
+        ]);
+        clientes = c1.data || c1 || [];
+        categorias = c2.data || c2 || [];
+        produtos = c3.data || c3 || [];
+
+        renderKPIs();
+        renderSelects();
+        renderClientes();
+        renderCategorias();
+        renderProdutos();
+      }catch(e){
+        showMsg("Falha ao carregar: " + e.message, "bad");
+      }
+    }
+
+    async function saveCliente(){
+      const nome = $("cli_nome").value.trim();
+      const slug = slugify($("cli_slug").value.trim() || nome);
+      const whatsapp = fmtWhats($("cli_whats").value);
+      const ativo = $("cli_ativo").value === "true";
+
+      const owner_email = $("cli_owner_email").value.trim();
+      const owner_password = $("cli_owner_pass").value;
+
+      if(!nome) return showMsg("Informe o nome do cliente.", "bad");
+      if(!slug) return showMsg("Informe o slug.", "bad");
+
+      const body = { nome, slug, whatsapp, ativo };
+      if(owner_email && owner_password){
+        body.owner_email = owner_email;
+        body.owner_password = owner_password;
+      }
+
+      try{
+        if(editing.clientes){
+          await apiFetch("/api/admin/clientes", { method:"PATCH", body: { id: editing.clientes.id, ...body } });
+          showMsg("Cliente atualizado ✅", "ok");
+        }else{
+          await apiFetch("/api/admin/clientes", { method:"POST", body });
+          showMsg("Cliente criado ✅", "ok");
+        }
+        clearClienteForm();
+        await loadAll();
+      }catch(e){
+        showMsg("Erro ao salvar cliente: " + e.message, "bad");
+      }
+    }
+
+    function loadClienteToForm(c){
+      editing.clientes = c;
+      $("cli_nome").value = c.nome || "";
+      $("cli_slug").value = c.slug || "";
+      $("cli_whats").value = c.whatsapp || "";
+      $("cli_ativo").value = (c.ativo === true || c.ativo === "true") ? "true" : "false";
+      $("cli_owner_email").value = "";
+      $("cli_owner_pass").value = "";
+      $("cli_hint").textContent = "Editando: " + (c.slug || "");
+      showMsg("Modo edição: Cliente", "ok");
+    }
+    function clearClienteForm(){
+      editing.clientes = null;
+      $("cli_nome").value = "";
+      $("cli_slug").value = "";
+      $("cli_whats").value = "";
+      $("cli_ativo").value = "true";
+      $("cli_owner_email").value = "";
+      $("cli_owner_pass").value = "";
+      $("cli_hint").textContent = "Link: ?u=slug";
+    }
+    async function toggleCliente(c){
+      try{
+        const ativo = !(c.ativo === true || c.ativo === "true");
+        await apiFetch("/api/admin/clientes", { method:"PATCH", body:{ id:c.id, ativo } });
+        await loadAll();
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+    async function duplicateCliente(c){
+      try{
+        const baseSlug = (c.slug || "cliente") + "-copia";
+        await apiFetch("/api/admin/clientes", { method:"POST", body:{
+          nome: (c.nome||"Cliente")+" (cópia)",
+          slug: baseSlug,
+          whatsapp: fmtWhats(c.whatsapp||""),
+          ativo: false
+        }});
+        await loadAll();
+        showMsg("Cliente duplicado ✅", "ok");
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+    async function deleteCliente(c){
+      if(!confirm("Excluir cliente '"+(c.nome||c.slug)+"'?")) return;
+      try{
+        await apiFetch("/api/admin/clientes", { method:"DELETE", body:{ id:c.id } });
+        await loadAll();
+        showMsg("Cliente excluído ✅", "ok");
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+
+    async function saveCategoria(){
+      const cliente_slug = $("cat_cliente").value;
+      const nome = $("cat_nome").value.trim();
+      const ordem = Number($("cat_ordem").value || 0);
+      const ativo = $("cat_ativo").value === "true";
+      if(!cliente_slug) return showMsg("Selecione um cliente.", "bad");
+      if(!nome) return showMsg("Informe o nome da categoria.", "bad");
+
+      const body = { cliente_slug, nome, ordem, ativo };
+
+      try{
+        if(editing.categorias){
+          await apiFetch("/api/admin/categorias", { method:"PATCH", body:{ id: editing.categorias.id, ...body }});
+          showMsg("Categoria atualizada ✅", "ok");
+        }else{
+          await apiFetch("/api/admin/categorias", { method:"POST", body });
+          showMsg("Categoria criada ✅", "ok");
+        }
+        clearCategoriaForm();
+        await loadAll();
+      }catch(e){
+        showMsg("Erro ao salvar categoria: " + e.message, "bad");
+      }
+    }
+    function loadCategoriaToForm(c){
+      editing.categorias = c;
+      $("cat_cliente").value = c.cliente_slug || "";
+      $("cat_nome").value = c.nome || "";
+      $("cat_ordem").value = c.ordem ?? 0;
+      $("cat_ativo").value = (c.ativo === true || c.ativo === "true") ? "true" : "false";
+      showMsg("Modo edição: Categoria", "ok");
+    }
+    function clearCategoriaForm(){
+      editing.categorias = null;
+      $("cat_cliente").value = "";
+      $("cat_nome").value = "";
+      $("cat_ordem").value = "";
+      $("cat_ativo").value = "true";
+    }
+    async function toggleCategoria(c){
+      try{
+        const ativo = !(c.ativo === true || c.ativo === "true");
+        await apiFetch("/api/admin/categorias", { method:"PATCH", body:{ id:c.id, ativo } });
+        await loadAll();
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+    async function duplicateCategoria(c){
+      try{
+        await apiFetch("/api/admin/categorias", { method:"POST", body:{
+          cliente_slug: c.cliente_slug,
+          nome: (c.nome||"Categoria")+" (cópia)",
+          ordem: (c.ordem||0)+1,
+          ativo: false
+        }});
+        await loadAll();
+        showMsg("Categoria duplicada ✅", "ok");
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+    async function deleteCategoria(c){
+      if(!confirm("Excluir categoria '"+(c.nome||"")+"'?")) return;
+      try{
+        await apiFetch("/api/admin/categorias", { method:"DELETE", body:{ id:c.id } });
+        await loadAll();
+        showMsg("Categoria excluída ✅", "ok");
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+
+    async function saveProduto(){
+      const cliente_slug = $("pro_cliente").value;
+      const categoria_id = $("pro_categoria").value ? Number($("pro_categoria").value) : null;
+      const nome = $("pro_nome").value.trim();
+      const preco = Number($("pro_preco").value || 0);
+      const descricao = $("pro_desc").value.trim();
+      const imagem = $("pro_img").value.trim();
+      const ativo = $("pro_ativo").value === "true";
+
+      if(!cliente_slug) return showMsg("Selecione um cliente.", "bad");
+      if(!categoria_id) return showMsg("Selecione uma categoria.", "bad");
+      if(!nome) return showMsg("Informe o nome do produto.", "bad");
+
+      const body = { cliente_slug, categoria_id, nome, preco, descricao, imagem, ativo };
+
+      try{
+        if(editing.produtos){
+          await apiFetch("/api/admin/produtos", { method:"PATCH", body:{ id: editing.produtos.id, ...body }});
+          showMsg("Produto atualizado ✅", "ok");
+        }else{
+          await apiFetch("/api/admin/produtos", { method:"POST", body });
+          showMsg("Produto criado ✅", "ok");
+        }
+        clearProdutoForm();
+        await loadAll();
+      }catch(e){
+        showMsg("Erro ao salvar produto: " + e.message, "bad");
+      }
+    }
+    function loadProdutoToForm(p){
+      editing.produtos = p;
+      $("pro_cliente").value = p.cliente_slug || "";
+      updateCategoriaSelectByCliente();
+      $("pro_categoria").value = p.categoria_id ?? "";
+      $("pro_nome").value = p.nome || "";
+      $("pro_preco").value = p.preco ?? "";
+      $("pro_desc").value = p.descricao || "";
+      $("pro_img").value = p.imagem || "";
+      $("pro_ativo").value = (p.ativo === true || p.ativo === "true") ? "true" : "false";
+      showMsg("Modo edição: Produto", "ok");
+    }
+    function clearProdutoForm(){
+      editing.produtos = null;
+      $("pro_cliente").value = "";
+      updateCategoriaSelectByCliente();
+      $("pro_categoria").value = "";
+      $("pro_nome").value = "";
+      $("pro_preco").value = "";
+      $("pro_desc").value = "";
+      $("pro_img").value = "";
+      $("pro_ativo").value = "true";
+    }
+    async function toggleProduto(p){
+      try{
+        const ativo = !(p.ativo === true || p.ativo === "true");
+        await apiFetch("/api/admin/produtos", { method:"PATCH", body:{ id:p.id, ativo } });
+        await loadAll();
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+    async function duplicateProduto(p){
+      try{
+        await apiFetch("/api/admin/produtos", { method:"POST", body:{
+          cliente_slug: p.cliente_slug,
+          categoria_id: p.categoria_id,
+          nome: (p.nome||"Produto")+" (cópia)",
+          preco: p.preco ?? 0,
+          descricao: p.descricao || "",
+          imagem: p.imagem || "",
+          ativo: false
+        }});
+        await loadAll();
+        showMsg("Produto duplicado ✅", "ok");
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+    async function deleteProduto(p){
+      if(!confirm("Excluir produto '"+(p.nome||"")+"'?")) return;
+      try{
+        await apiFetch("/api/admin/produtos", { method:"DELETE", body:{ id:p.id } });
+        await loadAll();
+        showMsg("Produto excluído ✅", "ok");
+      }catch(e){ showMsg("Erro: "+e.message, "bad"); }
+    }
+
+    /* =========================
+      Boot
+    ========================== */
+    function setLoggedUI(session){
+      const logged = !!session;
+      $("loginShell").style.display = logged ? "none" : "grid";
+      $("app").style.display = logged ? "block" : "none";
+      $("btnLogout").style.display = logged ? "inline-flex" : "none";
+      setStatus(logged ? "Logado" : "Deslogado");
+      if(logged) loadAll();
+    }
+
+    // events
+    $("btnGoPass").onclick = () => {
+      clearLoginErr();
+      const email = ($("email").value || "").trim();
+      if(!email) return showLoginErr("Digite seu email.");
+      goToPassStep(email);
     };
-  });
-  document.querySelectorAll(".mitem").forEach(b=>{
-    b.onclick= async (e)=>{
-      e.stopPropagation(); closeAllMenus();
-      const kind=b.dataset.k, act=b.dataset.act, id=b.dataset.id;
-      await rowAction(kind, act, id);
+    $("btnBack").onclick = () => { clearLoginErr(); goToEmailStep(); };
+
+    $("btnLogin").onclick = loginWithPassword;
+    $("btnGoogle1").onclick = loginWithGoogle;
+    $("btnGoogle2").onclick = loginWithGoogle;
+
+    $("btnLogout").onclick = logout;
+
+    $("btnSaveApi").onclick = () => {
+      const v = ($("apiBaseInput").value || "").trim().replace(/\/+$/,"");
+      if(!/^https?:\/\//i.test(v)) return showLoginErr("API inválida. Use https://...");
+      localStorage.setItem(LS_API, v);
+      setApiUi();
+      showMsg("API salva ✅", "ok");
     };
-  });
-}
-async function rowAction(kind, act, id){
-  try{
-    const endpoint = kind==="clientes"?"/api/admin/clientes":(kind==="categorias"?"/api/admin/categorias":"/api/admin/produtos");
-    if(act==="toggle"){
-      const item = (kind==="clientes"?clientes:(kind==="categorias"?categorias:produtos)).find(x=>String(x.id)===String(id));
-      await apiFetch(endpoint, { method:"POST", body:{ action:"toggle", id: item.id, ativo: !item.ativo }});
-      await loadAll(); return;
-    }
-    if(act==="del"){
-      if(!confirm("Excluir?")) return;
-      await apiFetch(endpoint, { method:"POST", body:{ action:"delete", id }});
-      await loadAll(); return;
-    }
-  }catch(e){
-    console.error(e);
-    toast(e.message, "err", 2);
-  }
-}
+    $("btnResetApi").onclick = () => {
+      localStorage.removeItem(LS_API);
+      setApiUi();
+      showMsg("API resetada ✅", "ok");
+    };
 
-function render(){
-  const q=(el("search").value||"").toLowerCase().trim();
-  const tbody=el("tbody");
+    // tabs
+    document.querySelectorAll(".tab").forEach(b=>{
+      b.onclick = () => setTab(b.dataset.tab);
+    });
 
-  let list = tab==="clientes"?clientes.slice():tab==="categorias"?categorias.slice():produtos.slice();
-  if(q) list = list.filter(x=>JSON.stringify(x).toLowerCase().includes(q));
+    // auto-slug
+    $("cli_nome").addEventListener("input", ()=>{
+      if($("cli_slug").value.trim()) return;
+      $("cli_slug").value = slugify($("cli_nome").value);
+    });
 
-  if(!list.length){ tbody.innerHTML=`<div class="trow"><div class="muted">Sem itens.</div></div>`; return; }
+    // selects
+    $("pro_cliente").addEventListener("change", updateCategoriaSelectByCliente);
 
-  if(tab==="clientes"){
-    tbody.innerHTML = list.sort((a,b)=>String(a.nome||"").localeCompare(String(b.nome||""))).map(x=>`
-      <div class="trow">
-        <div><b>${esc(x.nome)}</b><div class="muted">#${esc(x.id)}</div></div>
-        <div class="muted">${esc(x.slug||"")}</div>
-        <div>${chip(!!x.ativo,"Ativo","Inativo")}</div>
-        ${kebab("clientes", x)}
-      </div>
-    `).join("");
-  }else if(tab==="categorias"){
-    tbody.innerHTML = list.map(x=>`
-      <div class="trow">
-        <div><b>${esc(x.nome)}</b><div class="muted">#${esc(x.id)}</div></div>
-        <div class="muted">${esc(x.cliente_slug)} • ordem:${esc(x.ordem??0)}</div>
-        <div>${chip(!!x.ativo,"Ativa","Inativa")}</div>
-        ${kebab("categorias", x)}
-      </div>
-    `).join("");
-  }else{
-    tbody.innerHTML = list.map(x=>`
-      <div class="trow">
-        <div><b>${esc(x.nome)}</b><div class="muted">cat:${esc(x.categoria_id)} • #${esc(x.id)}</div></div>
-        <div class="muted">${esc(x.cliente_slug)} • R$ ${esc(x.preco??0)}</div>
-        <div>${chip(!!x.ativo,"Ativo","Inativo")}</div>
-        ${kebab("produtos", x)}
-      </div>
-    `).join("");
-  }
-  bindMenus();
-}
+    // save buttons
+    $("btnSalvarCliente").onclick = saveCliente;
+    $("btnLimparCliente").onclick = () => { clearClienteForm(); showMsg("Form limpo", ""); };
 
-/* ========= EVENTS ========= */
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
-el("btnLogin").onclick = loginPass;
-el("btnGoogle").onclick = loginGoogle;
-el("btnLogout").onclick = logout;
-el("btnReload").onclick = loadAll;
-el("search").oninput = render;
+    $("btnSalvarCategoria").onclick = saveCategoria;
+    $("btnLimparCategoria").onclick = () => { clearCategoriaForm(); showMsg("Form limpo", ""); };
 
-el("btnClear").onclick = clearForms;
-el("btnSave").onclick = saveCliente;
-el("btnSaveCat").onclick = saveCategoria;
-el("btnSaveProd").onclick = saveProduto;
-el("p_cliente_slug").onchange = rebuildCategoriasSelect;
+    $("btnSalvarProduto").onclick = saveProduto;
+    $("btnLimparProduto").onclick = () => { clearProdutoForm(); showMsg("Form limpo", ""); };
 
-sb.auth.onAuthStateChange(()=> refreshAuth());
-(async function init(){ await refreshAuth(); setTab("clientes"); })();
-</script>
+    // reload
+    $("btnReloadClientes").onclick = loadAll;
+    $("btnReloadCategorias").onclick = loadAll;
+    $("btnReloadProdutos").onclick = loadAll;
+
+    // search render
+    $("cli_search").addEventListener("input", renderClientes);
+    $("cat_search").addEventListener("input", renderCategorias);
+    $("pro_search").addEventListener("input", renderProdutos);
+
+    // init
+    (async function init(){
+      setApiUi();
+
+      // Captura sessão ao abrir (inclui retorno do Google)
+      const { data } = await sb.auth.getSession();
+      setLoggedUI(data?.session);
+
+      sb.auth.onAuthStateChange(async (_event, session) => {
+        setLoggedUI(session);
+      });
+    })();
+  </script>
 </body>
 </html>
