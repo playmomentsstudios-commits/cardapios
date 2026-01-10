@@ -3,24 +3,784 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cardápio</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Cardápio Digital</title>
 
-  <!-- Supabase UMD -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --bg0:#07121f;
+      --bg1:#091a2b;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.08);
+      --line:rgba(255,255,255,.10);
+      --text:#e7eefc;
+      --muted:rgba(231,238,252,.72);
+
+      --primary:#2b69ff;
+      --primary2:#1a4fd6;
+      --accent:#2ee6c5;
+      --accent2:#18b79b;
+
+      --danger:#ff5a67;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 22px;
+      --radius2: 16px;
+      --glass: blur(14px);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 15% 10%, rgba(43,105,255,.35), transparent 55%),
+        radial-gradient(900px 700px at 80% 15%, rgba(46,230,197,.18), transparent 55%),
+        radial-gradient(1100px 900px at 50% 95%, rgba(43,105,255,.20), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      padding: 26px 16px 80px;
+    }
+
+    a{color:inherit; text-decoration:none}
+    .wrap{max-width: 1200px; margin:0 auto}
+
+    /* Topbar */
+    .topbar{
+      display:flex; gap:16px; align-items:center; justify-content:space-between;
+      padding: 16px 18px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      backdrop-filter: var(--glass);
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center;
+    }
+    .logo{
+      width:52px; height:52px; border-radius: 16px;
+      background: linear-gradient(135deg, rgba(43,105,255,.25), rgba(46,230,197,.15));
+      border: 1px dashed rgba(255,255,255,.25);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; letter-spacing:.6px;
+      color: rgba(231,238,252,.88);
+    }
+    .brand h1{margin:0; font-size: 18px; line-height: 1.1}
+    .brand p{margin:4px 0 0; color: var(--muted); font-size: 12.5px}
+
+    .btn{
+      cursor:pointer;
+      border: none;
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 10px 30px rgba(0,0,0,.20);
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      display:inline-flex; align-items:center; gap:9px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18)}
+    .btn:active{transform: translateY(0)}
+    .btn.primary{
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      border-color: rgba(255,255,255,.18);
+    }
+    .btn.accent{
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #06201a;
+      border-color: rgba(0,0,0,.06);
+    }
+    .btn.ghost{
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow:none;
+    }
+    .btn.small{
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    /* Hero */
+    .hero{
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      backdrop-filter: var(--glass);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero::after{
+      content:"";
+      position:absolute; inset:-60px -80px auto auto;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle at 30% 30%, rgba(46,230,197,.22), transparent 60%);
+      filter: blur(2px);
+      transform: rotate(18deg);
+      pointer-events:none;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      align-items:center;
+    }
+    .hero h2{margin:0; font-size: 26px; letter-spacing:.2px}
+    .hero p{margin:10px 0 0; color: var(--muted); line-height: 1.45}
+    .heroActions{display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px}
+
+    .searchRow{
+      margin-top: 14px;
+      display:flex; gap:10px; align-items:center;
+    }
+    .searchRow input{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+      outline:none;
+      transition: border-color .12s ease, background .12s ease;
+    }
+    .searchRow input:focus{
+      border-color: rgba(46,230,197,.45);
+      background: rgba(0,0,0,.26);
+    }
+
+    /* Sections */
+    .section{
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      backdrop-filter: var(--glass);
+    }
+    .sectionHead{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+      margin-bottom: 12px;
+    }
+    .sectionHead h3{margin:0; font-size: 18px}
+    .sectionHead .sub{margin:0; color: var(--muted); font-size: 12.5px}
+
+    /* Clientes grid 2 por linha */
+    .gridClientes{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .clienteCard{
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+    }
+    .clienteCard:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.16);
+    }
+    .clienteInfo{
+      display:flex; gap:12px; align-items:center;
+      min-width: 0;
+    }
+    .avatar{
+      width:48px; height:48px; border-radius: 16px;
+      background: linear-gradient(135deg, rgba(43,105,255,.22), rgba(46,230,197,.10));
+      border: 1px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+    }
+    .clienteTxt{min-width:0}
+    .clienteTxt .nome{
+      font-weight: 900;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .clienteTxt .slug{
+      margin-top:4px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(231,238,252,.70);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .clienteBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+    }
+    .chip.ok{background: rgba(46,230,197,.14); border-color: rgba(46,230,197,.30)}
+    .dot{width:8px; height:8px; border-radius:99px; background: var(--accent)}
+
+    /* Produtos */
+    .topClienteBar{
+      display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+    .topClienteBar .left{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .titleCliente{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .titleCliente .n{font-weight: 900; font-size: 18px}
+    .titleCliente .m{color: var(--muted); font-size: 12.5px}
+
+    .chips{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .chipBtn{
+      cursor:pointer;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: rgba(231,238,252,.85);
+      font-weight: 900;
+      font-size: 13px;
+      white-space:nowrap;
+    }
+    .chipBtn.active{
+      background: rgba(43,105,255,.18);
+      border-color: rgba(43,105,255,.35);
+      color: var(--text);
+    }
+
+    .gridProdutos{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .prodCard{
+      border-radius: 18px;
+      overflow:hidden;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      display:flex; flex-direction:column;
+      min-height: 220px;
+    }
+    .prodCard:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.16);
+    }
+    .prodImg{
+      height: 120px;
+      background:
+        radial-gradient(120px 90px at 30% 20%, rgba(46,230,197,.18), transparent 65%),
+        radial-gradient(160px 120px at 80% 10%, rgba(43,105,255,.20), transparent 65%),
+        rgba(0,0,0,.22);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex; align-items:center; justify-content:center;
+      color: rgba(231,238,252,.55);
+      font-weight: 900;
+    }
+    .prodBody{padding: 12px; display:flex; flex-direction:column; gap:8px; flex:1}
+    .prodName{font-weight: 900; line-height:1.2}
+    .prodDesc{color: var(--muted); font-size: 12.5px; line-height:1.35; min-height: 34px}
+    .prodBottom{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto}
+    .price{font-family: var(--mono); font-weight: 900}
+    .btnAdd{padding: 10px 12px; border-radius: 14px}
+
+    /* Carrinho fixo */
+    .cartBar{
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      padding: 14px 16px;
+      background: rgba(9,26,43,.86);
+      border-top: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(14px);
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      z-index: 100;
+    }
+    .cartBar .total{
+      font-weight: 900;
+      font-family: var(--mono);
+    }
+    .cartBar .muted{color: var(--muted); font-size: 12.5px}
+
+    /* Footer */
+    footer{
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(231,238,252,.82);
+    }
+    .footerGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 12px;
+      align-items:center;
+    }
+    .footerGrid .links{
+      display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-size: 12.5px;
+    }
+
+    .hidden{display:none !important}
+
+    @media (max-width: 980px){
+      .heroGrid{grid-template-columns: 1fr}
+      .gridProdutos{grid-template-columns: repeat(2, minmax(0, 1fr))}
+    }
+    @media (max-width: 720px){
+      .topbar{flex-direction:column; align-items:stretch}
+      .gridClientes{grid-template-columns: 1fr}
+      .gridProdutos{grid-template-columns: 1fr}
+      .footerGrid{grid-template-columns: 1fr}
+      .footerGrid .links{justify-content:flex-start}
+    }
+  </style>
 </head>
+
 <body>
-  <header>
-    <h1 id="nome-loja">Carregando...</h1>
-  </header>
+<div class="wrap">
 
-  <main id="conteudo"></main>
-
-  <div id="carrinho">
-    <span>Total: <b id="total">R$ 0,00</b></span>
-    <button onclick="finalizarPedido()">Finalizar</button>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">CD</div>
+      <div>
+        <h1>Cardápio Digital</h1>
+        <p>Escolha uma loja ativa e veja produtos por categoria.</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end">
+      <a class="btn ghost small" href="./admin/" target="_blank">🛠️ Painel Admin</a>
+      <button class="btn primary small" id="btnVoltarHome" class="hidden" style="display:none">🏠 Home</button>
+    </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="heroGrid">
+      <div>
+        <h2>Peça rápido. Simples. Bonito.</h2>
+        <p>
+          Navegue pelas lojas ativas e encontre produtos por categoria.
+          Tudo com visual moderno e checkout direto no WhatsApp.
+        </p>
+
+        <div class="heroActions">
+          <span class="chip ok"><span class="dot"></span>Somente lojas ativas em destaque</span>
+          <span class="chip"><span class="dot" style="background:var(--primary)"></span>Produtos com abas por categoria</span>
+        </div>
+
+        <div class="searchRow">
+          <input id="searchClientes" placeholder="Buscar loja (nome ou slug)..." />
+          <button class="btn accent" id="btnReload">🔄 Atualizar</button>
+        </div>
+      </div>
+
+      <div style="padding:10px 0">
+        <div class="badge">⚡ Home estilo “marketplace”</div><br/><br/>
+        <div class="badge">🔎 Busca em lojas e produtos</div><br/><br/>
+        <div class="badge">🧾 Finaliza por WhatsApp</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME: CLIENTES -->
+  <div class="section" id="secClientes">
+    <div class="sectionHead">
+      <div>
+        <h3>Em destaque</h3>
+        <p class="sub" id="clientesSub">Carregando lojas...</p>
+      </div>
+      <div class="sub"><span class="mono" id="countClientes">—</span> lojas</div>
+    </div>
+
+    <div class="gridClientes" id="clientesGrid"></div>
+  </div>
+
+  <!-- VITRINE DO CLIENTE -->
+  <div class="section hidden" id="secProdutos">
+    <div class="topClienteBar">
+      <div class="left">
+        <div class="avatar" id="cliAvatar">LO</div>
+        <div class="titleCliente">
+          <div class="n" id="cliNome">Loja</div>
+          <div class="m">slug: <span class="mono" id="cliSlug">—</span> • WhatsApp: <span class="mono" id="cliWhats">—</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+        <input id="searchProdutos" placeholder="Buscar produtos..." style="min-width:280px; max-width:420px"/>
+        <button class="btn ghost" id="btnBack">⬅ Voltar</button>
+      </div>
+    </div>
+
+    <div class="chips" id="catChips"></div>
+
+    <div class="gridProdutos" id="prodGrid"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footerGrid">
+      <div>
+        <b>Cardápio Digital</b> • feito para vender rápido pelo WhatsApp.<br/>
+        <span style="color:var(--muted); font-size:12.5px">
+          Dica: crie lojas e produtos no Painel Admin e elas aparecem aqui automaticamente (somente ativas).
+        </span>
+      </div>
+      <div class="links">
+        <span class="badge">🔐 Supabase</span>
+        <span class="badge">⚙️ Vercel API</span>
+        <span class="badge">🌐 GitHub Pages</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- CARRINHO -->
+<div class="cartBar" id="cartBar">
+  <div>
+    <div class="total" id="total">Total: R$ 0,00</div>
+    <div class="muted" id="cartCount">0 itens</div>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center">
+    <button class="btn ghost" id="btnLimpar">🧹 Limpar</button>
+    <button class="btn primary" id="finalizar">📲 Finalizar pedido</button>
+  </div>
+</div>
+
+<script>
+/* ================================
+   CONFIG SUPABASE
+================================= */
+const SUPABASE_URL = "https://rgsnmxspyywwouhcdwkj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nHPsCV3y79FgexEMAeANWQ_P6jWRDd1";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ================================
+   STATE
+================================= */
+let clientes = [];
+let categorias = [];
+let produtos = [];
+let clienteAtual = null;
+
+let carrinho = [];
+let catAtivaId = "all";
+
+/* ================================
+   UTIL
+================================= */
+const el = (id)=>document.getElementById(id);
+const money = (v)=>Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+
+function getParamSlug(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("u"); // se tiver, abre vitrine direto
+}
+
+function setParamSlug(slug){
+  const url = new URL(window.location.href);
+  if (slug) url.searchParams.set("u", slug);
+  else url.searchParams.delete("u");
+  window.history.pushState({}, "", url.toString());
+}
+
+function initials(name){
+  const s = (name||"").trim().split(/\s+/).slice(0,2).map(x=>x[0]?.toUpperCase()||"").join("");
+  return s || "LO";
+}
+
+/* ================================
+   LOAD HOME (CLIENTES)
+================================= */
+async function loadClientes(){
+  const { data, error } = await sb
+    .from("clientes")
+    .select("id,nome,slug,whatsapp,ativo")
+    .eq("ativo", true)
+    .order("nome", { ascending:true });
+
+  if (error){
+    el("clientesSub").textContent = "Erro ao carregar lojas.";
+    console.error(error);
+    return;
+  }
+
+  clientes = data || [];
+  el("countClientes").textContent = clientes.length;
+  el("clientesSub").textContent = clientes.length ? "Lojas ativas disponíveis" : "Nenhuma loja ativa encontrada.";
+
+  renderClientes();
+}
+
+function renderClientes(){
+  const q = (el("searchClientes").value || "").trim().toLowerCase();
+  const list = q
+    ? clientes.filter(c => (c.nome||"").toLowerCase().includes(q) || (c.slug||"").toLowerCase().includes(q))
+    : clientes;
+
+  const grid = el("clientesGrid");
+  if (!list.length){
+    grid.innerHTML = `<div style="color:rgba(231,238,252,.75)">Nenhuma loja encontrada.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(c => `
+    <div class="clienteCard">
+      <div class="clienteInfo">
+        <div class="avatar">${initials(c.nome)}</div>
+        <div class="clienteTxt">
+          <div class="nome">${escapeHtml(c.nome || "Loja")}</div>
+          <div class="slug">${escapeHtml(c.slug || "")}</div>
+        </div>
+      </div>
+      <div class="clienteBtns">
+        <button class="btn small ghost" onclick="openLoja('${c.slug}')">➡ Entrar</button>
+        <button class="btn small accent" onclick="openLoja('${c.slug}')">🛍 Ver produtos</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function escapeHtml(str){
+  return String(str ?? "").replace(/[&<>"']/g, (m)=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+/* ================================
+   LOAD VITRINE (PRODUTOS)
+================================= */
+async function openLoja(slug){
+  setParamSlug(slug);
+  await loadVitrine(slug);
+}
+
+async function loadVitrine(slug){
+  // cliente
+  const { data: cli, error: e1 } = await sb
+    .from("clientes")
+    .select("*")
+    .eq("slug", slug)
+    .eq("ativo", true)
+    .single();
+
+  if (e1 || !cli){
+    // se slug inválido, volta home
+    setParamSlug(null);
+    showHome();
+    return;
+  }
+
+  clienteAtual = cli;
+
+  // categorias
+  const { data: cats } = await sb
+    .from("categorias")
+    .select("*")
+    .eq("cliente_slug", slug)
+    .eq("ativo", true)
+    .order("ordem", { ascending:true });
+
+  // produtos
+  const { data: prods } = await sb
+    .from("produtos")
+    .select("*")
+    .eq("cliente_slug", slug)
+    .eq("ativo", true);
+
+  categorias = cats || [];
+  produtos = prods || [];
+
+  // UI
+  el("cliAvatar").textContent = initials(cli.nome);
+  el("cliNome").textContent = cli.nome;
+  el("cliSlug").textContent = cli.slug;
+  el("cliWhats").textContent = cli.whatsapp || "—";
+
+  el("btnVoltarHome").style.display = "inline-flex";
+
+  buildCatChips();
+  renderProdutos();
+
+  // troca seções
+  el("secClientes").classList.add("hidden");
+  el("hero").classList.add("hidden");
+  el("secProdutos").classList.remove("hidden");
+}
+
+function buildCatChips(){
+  const chips = el("catChips");
+  const allActive = (catAtivaId === "all");
+
+  chips.innerHTML = `
+    <button class="chipBtn ${allActive ? "active":""}" onclick="setCategoria('all')">Todos</button>
+    ${categorias.map(c => `
+      <button class="chipBtn ${String(catAtivaId)===String(c.id) ? "active":""}" onclick="setCategoria('${c.id}')">
+        ${escapeHtml(c.nome)}
+      </button>
+    `).join("")}
+  `;
+}
+
+function setCategoria(id){
+  catAtivaId = id;
+  buildCatChips();
+  renderProdutos();
+}
+
+function renderProdutos(){
+  const q = (el("searchProdutos").value || "").trim().toLowerCase();
+
+  let list = produtos.slice();
+
+  if (catAtivaId !== "all"){
+    list = list.filter(p => String(p.categoria_id) === String(catAtivaId));
+  }
+
+  if (q){
+    list = list.filter(p => (p.nome||"").toLowerCase().includes(q) || (p.descricao||"").toLowerCase().includes(q));
+  }
+
+  const grid = el("prodGrid");
+  if (!list.length){
+    grid.innerHTML = `<div style="color:rgba(231,238,252,.75)">Nenhum produto encontrado.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => `
+    <div class="prodCard">
+      <div class="prodImg">${p.imagem_url ? `<img src="${escapeHtml(p.imagem_url)}" alt="" style="width:100%;height:100%;object-fit:cover"/>` : "Imagem"}</div>
+      <div class="prodBody">
+        <div class="prodName">${escapeHtml(p.nome)}</div>
+        <div class="prodDesc">${escapeHtml(p.descricao || "")}</div>
+        <div class="prodBottom">
+          <div class="price">${money(p.preco)}</div>
+          <button class="btn btnAdd accent small" onclick="addCarrinho('${p.id}')">➕</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ================================
+   HOME / NAV
+================================= */
+function showHome(){
+  clienteAtual = null;
+  categorias = [];
+  produtos = [];
+  catAtivaId = "all";
+
+  el("secProdutos").classList.add("hidden");
+  el("secClientes").classList.remove("hidden");
+  el("hero").classList.remove("hidden");
+
+  el("btnVoltarHome").style.display = "none";
+}
+
+window.addEventListener("popstate", async ()=>{
+  const slug = getParamSlug();
+  if (slug) await loadVitrine(slug);
+  else showHome();
+});
+
+/* ================================
+   CARRINHO
+================================= */
+function addCarrinho(prodId){
+  const p = produtos.find(x => String(x.id) === String(prodId));
+  if (!p) return;
+  carrinho.push(p);
+  updateCart();
+}
+
+function updateCart(){
+  const total = carrinho.reduce((s,p)=>s+Number(p.preco||0),0);
+  el("total").textContent = "Total: " + money(total);
+  el("cartCount").textContent = carrinho.length + (carrinho.length===1 ? " item" : " itens");
+}
+
+function limparCarrinho(){
+  carrinho = [];
+  updateCart();
+}
+
+async function finalizarPedido(){
+  if (!clienteAtual) return alert("Escolha uma loja primeiro.");
+  if (!clienteAtual.whatsapp) return alert("Esta loja não tem WhatsApp cadastrado.");
+  if (carrinho.length === 0) return;
+
+  const linhas = carrinho
+    .map(p => `• ${p.nome} - ${money(p.preco)}`)
+    .join("%0A");
+
+  const total = carrinho.reduce((s,p)=>s+Number(p.preco||0),0);
+  const texto = `Pedido:%0A${linhas}%0A%0ATotal: ${money(total)}`;
+
+  window.open(`https://wa.me/55${clienteAtual.whatsapp}?text=${texto}`, "_blank");
+}
+
+/* ================================
+   INIT
+================================= */
+(async function init(){
+  el("btnReload").addEventListener("click", loadClientes);
+  el("searchClientes").addEventListener("input", renderClientes);
+
+  el("btnBack").addEventListener("click", ()=>{
+    setParamSlug(null);
+    showHome();
+  });
+
+  el("btnVoltarHome").addEventListener("click", ()=>{
+    setParamSlug(null);
+    showHome();
+  });
+
+  el("searchProdutos").addEventListener("input", renderProdutos);
+
+  el("btnLimpar").addEventListener("click", limparCarrinho);
+  el("finalizar").addEventListener("click", finalizarPedido);
+
+  updateCart();
+  await loadClientes();
+
+  // Se veio com ?u=slug, abre direto
+  const slug = getParamSlug();
+  if (slug) await loadVitrine(slug);
+})();
+</script>
 </body>
 </html>
